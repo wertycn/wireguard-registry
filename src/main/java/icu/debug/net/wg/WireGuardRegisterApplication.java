@@ -4,10 +4,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WgnetRegisterApplication {
+public class WireGuardRegisterApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(WgnetRegisterApplication.class, args);
+
+        SpringApplication.run(WireGuardRegisterApplication.class, args);
     }
 
 }

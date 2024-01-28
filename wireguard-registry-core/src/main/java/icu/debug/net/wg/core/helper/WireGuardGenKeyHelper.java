@@ -1,0 +1,26 @@
+package icu.debug.net.wg.core.helper;
+
+import org.whispersystems.curve25519.Curve25519;
+import org.whispersystems.curve25519.Curve25519KeyPair;
+
+import java.util.Base64;
+
+/**
+ * 包装Curve25519密钥生成工具，支持基于私钥生成公钥
+ */
+public class WireGuardGenKeyHelper {
+
+    private static final Curve25519OpenProvider PROVIDER = new Curve25519OpenProvider();
+
+    public static String genPrivateKey() {
+        byte[] bytes = PROVIDER.generatePrivateKey();
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+
+    public static String genPubKeyByPrivateKey(String privateKey) {
+        byte[] bytes = Base64.getDecoder().decode(privateKey);
+        byte[] publicKey = PROVIDER.generatePublicKey(bytes);
+        return Base64.getEncoder().encodeToString(publicKey);
+    }
+}

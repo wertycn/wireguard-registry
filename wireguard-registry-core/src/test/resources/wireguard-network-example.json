@@ -1,0 +1,78 @@
+{
+  "name": "WireGuard虚拟测试网络",
+  "local_area_networks": [
+    {
+      "name": "local",
+      "network_type": "OPEN_NAT",
+      "network_nodes": [
+        {
+          "server_node": {
+            "hostname": "local-1",
+            "public_address": "181.1.1.1",
+            "private_address": "10.0.4.1"
+          }
+        },
+        {
+          "server_node": {
+            "hostname": "local-2",
+            "public_address": "181.1.1.2",
+            "private_address": "10.0.4.2"
+          }
+        }
+      ]
+    },
+    {
+      "name": "腾讯云-A账号",
+      "network_type": "CLOUD",
+      "network_node": [
+        {
+          "server_node": {
+            "hostname": "group-tcloud-a-01",
+            "public_address": "182.1.6.1",
+            "private_address": "10.1.6.1"
+          }
+        },
+        {
+          "server_node": {
+            "hostname": "group-tcloud-a-03",
+            "public_address": "182.1.6.2",
+            "private_address": "10.1.6.2"
+          }
+        },
+        {
+          "server_node": {
+            "hostname": "group-tcloud-a-03",
+            "public_address": "182.1.6.3",
+            "private_address": "10.1.6.3"
+          }
+        }
+      ]
+    },
+    {
+      "name": "腾讯云-B账号",
+      "network_type": "CLOUD",
+      "network_node": [
+        {
+          "server_node": {
+            "hostname": "group-tcloud-b-01",
+            "public_address": "183.1.7.1",
+            "private_address": "10.2.7.1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "阿里云-C账号",
+      "network_type": "CLOUD",
+      "network_node": [
+        {
+          "server_node": {
+            "hostname": "group-ali-cloud-C-01",
+            "public_address": "183.1.8.1",
+            "private_address": "10.3.8.1"
+          }
+        }
+      ]
+    }
+  ]
+}

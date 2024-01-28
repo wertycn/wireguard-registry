@@ -9,8 +9,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>icu.debug.net.wg.service</groupId>
-    <artifactId>wireguard-register-service</artifactId>
+    <groupId>icu.debug.net.wg.client</groupId>
+    <artifactId>wireguard-register-client</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

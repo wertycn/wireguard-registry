@@ -1,4 +1,4 @@
-package icu.debug.net.wg.core;
+package icu.debug.net.wg.service;
 
 public class Main {
     public static void main(String[] args) {
