@@ -22,4 +22,8 @@ public class LocalAreaNetwork {
      * 局域网内的服务器列表
      */
     private List<WireGuardNetworkNode> networkNodes;
+
+
+
+
 }

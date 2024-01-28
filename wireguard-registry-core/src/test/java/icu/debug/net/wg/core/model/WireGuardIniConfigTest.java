@@ -1,6 +1,6 @@
 package icu.debug.net.wg.core.model;
 
-import icu.debug.net.wg.core.model.config.WireGuardConfig;
+import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.config.WireGuardInterface;
 import icu.debug.net.wg.core.model.config.WireGuardPeer;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class WireGuardConfigTest {
+class WireGuardIniConfigTest {
     private static String TEST_INI_CONTENT = """
             [Interface]
             # Name = unit.test
@@ -45,7 +45,7 @@ class WireGuardConfigTest {
         peer.setPublicKey("TestXasdfqwerqrwerq=");
         peer.setAllowedIPs(Arrays.asList("10.201.1.1/32"));
         peer.setPersistentKeepalive(25);
-        WireGuardConfig config = new WireGuardConfig();
+        WireGuardIniConfig config = new WireGuardIniConfig();
         config.setName("wg0");
         config.setWgInterface(wgInterface);
         config.setPeers(Arrays.asList(peer, peer));

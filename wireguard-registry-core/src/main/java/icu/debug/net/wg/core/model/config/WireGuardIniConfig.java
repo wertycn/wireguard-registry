@@ -1,8 +1,6 @@
 package icu.debug.net.wg.core.model.config;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,9 +10,9 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class WireGuardConfig {
-
-    private final static String DEFAULT_NAME = "wg0";
+@AllArgsConstructor
+@NoArgsConstructor
+public class WireGuardIniConfig {
 
     /**
      * 配置文件名
