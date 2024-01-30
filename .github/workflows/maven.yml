@@ -28,8 +28,11 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn clean verify sonar:sonar \
-            -Dsonar.token=${secrets.SONAR_CLOUD_TOKEN} \
+      run: mvn org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent \
+            test org.jacoco:jacoco-maven-plugin:0.8.6:report \
+            org.jacoco:jacoco-maven-plugin:0.8.6:report-aggregate \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar \
+            -Dsonar.token=${{ secrets.SONAR_CLOUD_TOKEN }} \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.organization=wertycn \
             -Dsonar.projectKey=wertycn_wireguard-registry
