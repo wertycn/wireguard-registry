@@ -181,17 +181,4 @@ class WireGuardIniConfigGeneratorTest {
         assertNotNull(wireGuardIniConfig.toIniString());
     }
 
-    @Test
-    @DisplayName("InetAddress Hello world")
-    void testAddress() {
-
-        SubnetUtils net = new SubnetUtils("10.201.1.0", "255.255.255.0");
-        net.setInclusiveHostCount(false);
-        System.out.println(net.getInfo());
-        String[] allAddresses = net.getInfo().getAllAddresses();
-        Arrays.stream(allAddresses).forEach(System.out::println);
-
-    }
-
-
 }
