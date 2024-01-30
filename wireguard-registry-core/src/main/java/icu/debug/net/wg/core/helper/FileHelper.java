@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 文件操作助手类
@@ -17,7 +18,7 @@ public class FileHelper {
 
     public static String readResource(String path) throws IOException {
         ClassPathResource classPathResource = new ClassPathResource(path);
-        return FileUtils.readFileToString(classPathResource.getFile(), "UTF-8");
+        return FileUtils.readFileToString(classPathResource.getFile(), StandardCharsets.UTF_8);
     }
 
 }
