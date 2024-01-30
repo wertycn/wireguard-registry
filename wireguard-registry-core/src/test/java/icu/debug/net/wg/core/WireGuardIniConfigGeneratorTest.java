@@ -3,13 +3,18 @@ package icu.debug.net.wg.core;
 import icu.debug.net.wg.core.helper.FileHelper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.config.WireGuardInterface;
+import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
 import icu.debug.net.wg.core.model.config.WireGuardPeer;
 import icu.debug.net.wg.core.model.network.*;
 import lombok.SneakyThrows;
+import org.apache.commons.net.util.SubnetUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -167,10 +172,25 @@ class WireGuardIniConfigGeneratorTest {
 
     @Test
     @DisplayName("指定节点获取WireGuard组网配置")
-    void testGetIniConfigByHostname(){
-        WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct());
+    void testGetIniConfigByHostname() {
+        WireGuardNetProperties properties = new WireGuardNetProperties();
+        properties.setNetmask("255.255.255.0");
+        properties.setAddress("10.201.0.1");
+        WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct(), properties);
         WireGuardIniConfig wireGuardIniConfig = generator.buildWireGuardIniConfig("local-1");
-        System.out.println(wireGuardIniConfig.toIniString());
+        assertNotNull(wireGuardIniConfig.toIniString());
+    }
+
+    @Test
+    @DisplayName("InetAddress Hello world")
+    void testAddress() {
+
+        SubnetUtils net = new SubnetUtils("10.201.1.0", "255.255.255.0");
+        net.setInclusiveHostCount(false);
+        System.out.println(net.getInfo());
+        String[] allAddresses = net.getInfo().getAllAddresses();
+        Arrays.stream(allAddresses).forEach(System.out::println);
+
     }
 
 

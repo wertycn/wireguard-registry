@@ -1,7 +1,6 @@
 package icu.debug.net.wg.core.model.network;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,6 +20,19 @@ import static icu.debug.net.wg.core.config.JacksonConfiguration.DEFAULT_JSON_MAP
 public class WireGuardNetworkStruct {
 
     private String name;
+
+    /**
+     * 虚拟网地址
+     * <p>
+     *     用于自动为节点分配IP
+     * </p>
+     */
+    private String address;
+
+    /**
+     * 子网掩码
+     */
+    private String netmask;
 
     private List<LocalAreaNetwork> localAreaNetworks;
 

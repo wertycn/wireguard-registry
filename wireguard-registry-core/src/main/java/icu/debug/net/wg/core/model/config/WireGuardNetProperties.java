@@ -13,7 +13,7 @@ import java.util.List;
 @Getter
 @Setter
 @ToString
-public class WireGuardDefaultConfiguration {
+public class WireGuardNetProperties {
 
     /**
      * 监听端口
@@ -74,4 +74,8 @@ public class WireGuardDefaultConfiguration {
      * 关闭 VPN 接口之后运行的命令。这个选项可以指定多次，按顺序执行
      */
     private List<String> postDown;
+    private String address ;
+    private String netmask ;
+
+
 }

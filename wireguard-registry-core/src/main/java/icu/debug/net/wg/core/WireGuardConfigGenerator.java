@@ -1,6 +1,6 @@
 package icu.debug.net.wg.core;
 
-import icu.debug.net.wg.core.model.config.WireGuardDefaultConfiguration;
+import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.config.WireGuardInterface;
 import icu.debug.net.wg.core.model.config.WireGuardPeer;
@@ -10,25 +10,39 @@ import java.util.*;
 
 public class WireGuardConfigGenerator {
 
-    private final WireGuardDefaultConfiguration defaultConfiguration = new WireGuardDefaultConfiguration();
+    private final WireGuardNetProperties defaultConfiguration;
 
     private final WireGuardNetworkStruct networkStruct;
 
     private final Map<String, NetworkNodeWrapper> nodeWrapperMap = new HashMap<>();
 
-    public WireGuardConfigGenerator(WireGuardNetworkStruct networkStruct) {
-        this.networkStruct = networkStruct;
-        this.mergeDefaultConfiguration(networkStruct.getNetworkNodes());
-        this.initNodeWrapperMap(networkStruct);
+    private final NetAddressAllocator netAddressAllocator;
 
+    public WireGuardConfigGenerator(WireGuardNetworkStruct networkStruct, WireGuardNetProperties defaultConfiguration) {
+        this.defaultConfiguration = defaultConfiguration;
+        this.networkStruct = this.mergeDefaultProp(networkStruct);
+        this.netAddressAllocator = new NetAddressAllocator(networkStruct.getAddress(), networkStruct.getNetmask());
+        this.initNodeWrapperMap(networkStruct);
     }
 
     /**
      * 合并默认配置
      *
-     * @param networkNodes
+     * @param networkStruct
      */
-    private void mergeDefaultConfiguration(List<WireGuardNetworkNode> networkNodes) {
+    private WireGuardNetworkStruct mergeDefaultProp(WireGuardNetworkStruct networkStruct) {
+        // 合并默认配置
+        // 子网分配
+        if (networkStruct.getAddress() == null) {
+            networkStruct.setAddress(defaultConfiguration.getAddress());
+        }
+        if (networkStruct.getNetmask() == null) {
+            networkStruct.setNetmask(defaultConfiguration.getNetmask());
+        }
+
+
+        return networkStruct;
+
 
     }
 
