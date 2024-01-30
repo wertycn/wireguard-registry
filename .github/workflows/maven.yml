@@ -36,8 +36,7 @@ jobs:
     - name: 单元测试
       run: mvn org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report | grep -v "Download" | grep -v Progress
     - name: 代码扫描
-      run: mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.9.1.2184:sonar -Dsonar.token=${{ secrets.SONAR_CLOUD_TOKEN }} -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=wertycn -Dsonar.projectKey=wertycn_wireguard-registry
-
+      run: SONAR_TOKEN=${{ secrets.SONAR_CLOUD_TOKEN }} sh sonar.sh | grep -v "Download" | grep -v Progress
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     - name: 更新依赖图
       uses: advanced-security/maven-dependency-submission-action@v3
