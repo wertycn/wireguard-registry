@@ -1,8 +1,5 @@
 package icu.debug.net.wg.core.helper;
 
-import org.whispersystems.curve25519.Curve25519;
-import org.whispersystems.curve25519.Curve25519KeyPair;
-
 import java.util.Base64;
 
 /**

@@ -5,7 +5,6 @@ import icu.debug.net.wg.core.model.config.WireGuardPeer;
 import icu.debug.net.wg.core.model.network.EndpointType;
 import icu.debug.net.wg.core.model.network.NetworkType;
 import icu.debug.net.wg.core.model.network.WireGuardNetworkNode;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
