@@ -1,4 +1,9 @@
 # WireGuard 注册中心
+
+[![Java CI with Maven](https://github.com/wertycn/wireguard-registry/actions/workflows/maven.yml/badge.svg)](https://github.com/wertycn/wireguard-registry/actions/workflows/maven.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=wertycn_wireguard-registry&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=wertycn_wireguard-registry)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=wertycn_wireguard-registry&metric=coverage)](https://sonarcloud.io/summary/new_code?id=wertycn_wireguard-registry)
+
 ## 项目介绍
 WireGuard 轻量注册中心，用于 WireGuard 配置的管理,生成，下发，支持通过构建网络模型生成复杂的WireGuard配置
 支持跨云，多局域网，中继的多种负责模式组合，可以用于构建复杂的网络拓扑，同时最大化的减少公网流量(局域网内走内网通信)
