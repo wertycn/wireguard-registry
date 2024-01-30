@@ -30,19 +30,19 @@ import java.util.function.Function;
 @ToString
 public class WireGuardInterface {
 
-    private final static Map<String, Function<WireGuardInterface,String>> FORMAT_SINGLE_FUNC_MAT = new LinkedHashMap<>();
+    private static final Map<String, Function<WireGuardInterface, String>> FORMAT_SINGLE_FUNC_MAT = new LinkedHashMap<>();
 
     static {
         FORMAT_SINGLE_FUNC_MAT.put("# Name", WireGuardInterface::getName);
         FORMAT_SINGLE_FUNC_MAT.put("Address", WireGuardInterface::getAddress);
-        FORMAT_SINGLE_FUNC_MAT.put("ListenPort", item-> Optional.ofNullable(item.getListenPort()).map(String::valueOf).orElse(""));
+        FORMAT_SINGLE_FUNC_MAT.put("ListenPort", item -> Optional.ofNullable(item.getListenPort()).map(String::valueOf).orElse(""));
         FORMAT_SINGLE_FUNC_MAT.put("PrivateKey", WireGuardInterface::getPrivateKey);
-        FORMAT_SINGLE_FUNC_MAT.put("DNS", item-> Optional.ofNullable(item.getDns()).map(v->String.join(",",v)).orElse(""));
+        FORMAT_SINGLE_FUNC_MAT.put("DNS", item -> Optional.ofNullable(item.getDns()).map(v -> String.join(",", v)).orElse(""));
         FORMAT_SINGLE_FUNC_MAT.put("Table", WireGuardInterface::getTable);
-        FORMAT_SINGLE_FUNC_MAT.put("MTU", item-> Optional.ofNullable(item.getMtu()).map(String::valueOf).orElse(""));
+        FORMAT_SINGLE_FUNC_MAT.put("MTU", item -> Optional.ofNullable(item.getMtu()).map(String::valueOf).orElse(""));
     }
 
-    private final static Map<String, Function<WireGuardInterface,List<String>>> FORMAT_MULTI_FUNC_MAT = new LinkedHashMap<>();
+    private static final Map<String, Function<WireGuardInterface, List<String>>> FORMAT_MULTI_FUNC_MAT = new LinkedHashMap<>();
 
     static {
         FORMAT_MULTI_FUNC_MAT.put("PreUp", WireGuardInterface::getPreUp);

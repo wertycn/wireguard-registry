@@ -84,9 +84,7 @@ public class WireGuardConfigGenerator {
         }
         NetworkNodeWrapper requestWrapper = this.nodeWrapperMap.get(hostname);
         List<WireGuardPeer> peers = new ArrayList<>();
-        nodeWrapperMap.forEach((key, networkNodeWrapper) -> {
-            peers.add(networkNodeWrapper.buildPeer(requestWrapper));
-        });
+        nodeWrapperMap.forEach((key, value) -> peers.add(value.buildPeer(requestWrapper)));
         String name = this.networkStruct.getName();
         WireGuardInterface wgInterface = requestWrapper.toInterface();
         return new WireGuardIniConfig(name, wgInterface, peers);
