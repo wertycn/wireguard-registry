@@ -28,9 +28,8 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn org.jacoco:jacoco-maven-plugin:0.8.6:prepare-agent \
-            test org.jacoco:jacoco-maven-plugin:0.8.6:report \
-            org.jacoco:jacoco-maven-plugin:0.8.6:report-aggregate \
+      run: mvn org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent \
+            test org.jacoco:jacoco-maven-plugin:0.8.10:report \
             org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar \
             -Dsonar.token=${{ secrets.SONAR_CLOUD_TOKEN }} \
             -Dsonar.host.url=https://sonarcloud.io \
