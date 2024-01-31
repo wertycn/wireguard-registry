@@ -23,6 +23,11 @@ public class WireGuardNetworkNode {
     private ServerNode serverNode;
 
     /**
+     * 忽略默认配置
+     */
+    private boolean ignoreDefault = false;
+
+    /**
      * WireGuard 组网网络的的IP地址
      */
     private String address;

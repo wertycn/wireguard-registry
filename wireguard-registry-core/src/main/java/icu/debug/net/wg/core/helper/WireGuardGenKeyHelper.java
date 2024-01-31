@@ -1,12 +1,14 @@
 package icu.debug.net.wg.core.helper;
 
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Base64;
 
 /**
  * 包装Curve25519密钥生成工具，支持基于私钥生成公钥
  */
+@Slf4j
 @UtilityClass
 public class WireGuardGenKeyHelper {
 
@@ -22,5 +24,28 @@ public class WireGuardGenKeyHelper {
         byte[] bytes = Base64.getDecoder().decode(privateKey);
         byte[] publicKey = PROVIDER.generatePublicKey(bytes);
         return Base64.getEncoder().encodeToString(publicKey);
+    }
+
+    public static boolean verify(String privateKey, String publicKey) {
+        try {
+            byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey);
+            byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey);
+            byte[] message = "hello".getBytes();
+            byte[] signature = PROVIDER.calculateSignature(PROVIDER.getRandom(32), privateKeyBytes, message);
+            return PROVIDER.verifySignature(publicKeyBytes, message, signature);
+        } catch (Exception e) {
+            log.warn("sign verify error private key {} public key {} :{}",privateKey, publicKey, e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean formatValid(String key) {
+        try {
+            byte[] bytes = Base64.getDecoder().decode(key);
+            return bytes.length == 32;
+        } catch (Exception e) {
+            log.warn("Invalid private key [{}]", key);
+            return false;
+        }
     }
 }

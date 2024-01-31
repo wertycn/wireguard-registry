@@ -15,6 +15,17 @@ import java.util.List;
 @ToString
 public class WireGuardNetProperties {
 
+
+    /**
+     * 子网地址
+     */
+    private String address;
+
+    /**
+     * 子网掩码
+     */
+    private String netmask;
+
     /**
      * 监听端口
      * <p>
@@ -74,8 +85,6 @@ public class WireGuardNetProperties {
      * 关闭 VPN 接口之后运行的命令。这个选项可以指定多次，按顺序执行
      */
     private List<String> postDown;
-    private String address ;
-    private String netmask ;
 
 
 }

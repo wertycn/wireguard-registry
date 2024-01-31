@@ -1,18 +1,22 @@
 package icu.debug.net.wg.core;
 
+import icu.debug.net.wg.core.helper.WireGuardGenKeyHelper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.config.WireGuardInterface;
 import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
 import icu.debug.net.wg.core.model.config.WireGuardPeer;
 import icu.debug.net.wg.core.model.network.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Slf4j
 public class WireGuardConfigGenerator {
 
+    // TODO: 默认配置必需属性校验
     private final WireGuardNetProperties defaultConfiguration;
 
     private final WireGuardNetworkStruct networkStruct;
@@ -21,32 +25,114 @@ public class WireGuardConfigGenerator {
 
     private final NetAddressAllocator netAddressAllocator;
 
-    public WireGuardConfigGenerator(WireGuardNetworkStruct networkStruct, WireGuardNetProperties defaultConfiguration) {
+    public WireGuardConfigGenerator(WireGuardNetworkStruct struct, WireGuardNetProperties defaultConfiguration) {
         this.defaultConfiguration = defaultConfiguration;
-        this.networkStruct = this.mergeDefaultProp(networkStruct);
-        this.netAddressAllocator = new NetAddressAllocator(networkStruct.getAddress(), networkStruct.getNetmask());
-        this.initNodeWrapperMap(networkStruct);
+        this.networkStruct = this.mergeSubNetProp(struct);
+        this.netAddressAllocator = new NetAddressAllocator(this.networkStruct.getAddress(), this.networkStruct.getNetmask());
+        this.registryUsedSubNetAddress(this.networkStruct);
+        // 全局默认配置设置
+        this.appendDefaultProperties();
+        this.initNodeWrapperMap(this.networkStruct);
+    }
+
+    private void appendDefaultProperties() {
+        this.networkStruct.getLocalAreaNetworks()
+                .stream()
+                .map(LocalAreaNetwork::getNetworkNodes)
+                .flatMap(List::stream)
+                .forEach(this::appendDefaultProperties);
+
+    }
+
+    private void appendDefaultProperties(WireGuardNetworkNode node) {
+        if (node.isIgnoreDefault()) {
+            log.info("WireGuard Struct node [{}] ignore default properties", node);
+            return;
+        }
+        // 子网分配
+        if (!StringUtils.hasLength(node.getAddress()) || netAddressAllocator.isInSubnet(node.getAddress())) {
+            netAddressAllocator.allocateIP().ifPresentOrElse(node::setAddress, () -> {
+                throw new IllegalArgumentException("WireGuard Struct node address is empty , and can not allocate address");
+            });
+        }
+
+
+        // 密钥分配
+        if (!StringUtils.hasLength(node.getPrivateKey()) || !WireGuardGenKeyHelper.formatValid(node.getPrivateKey())) {
+            String privateKey = WireGuardGenKeyHelper.genPrivateKey();
+            node.setPrivateKey(privateKey);
+            node.setPublicKey(WireGuardGenKeyHelper.genPubKeyByPrivateKey(privateKey));
+        }
+
+        String publicKey = node.getPublicKey();
+        boolean formatNotValid = !StringUtils.hasLength(publicKey) || !WireGuardGenKeyHelper.formatValid(publicKey);
+        if (formatNotValid || !WireGuardGenKeyHelper.verify(node.getPrivateKey(), publicKey)) {
+            log.info("WireGuard Struct node [{}] public key is empty or not valid, regenerate private and public key", node);
+            String privateKey = WireGuardGenKeyHelper.genPrivateKey();
+            node.setPrivateKey(privateKey);
+            node.setPublicKey(WireGuardGenKeyHelper.genPubKeyByPrivateKey(privateKey));
+        }
+
+        if (node.getListenPort() == null) {
+            node.setListenPort(defaultConfiguration.getListenPort());
+        }
+        if (CollectionUtils.isEmpty(node.getDns())) {
+            node.setDns(defaultConfiguration.getDns());
+        }
+        if (!StringUtils.hasLength(node.getTable())) {
+            node.setTable(defaultConfiguration.getTable());
+        }
+        if (node.getMtu() == null) {
+            node.setMtu(defaultConfiguration.getMtu());
+        }
     }
 
     /**
-     * 合并默认配置
+     * 合并子网默认配置
      *
      * @param networkStruct
      */
-    private WireGuardNetworkStruct mergeDefaultProp(WireGuardNetworkStruct networkStruct) {
-        // 合并默认配置
+    private WireGuardNetworkStruct mergeSubNetProp(WireGuardNetworkStruct networkStruct) {
         // 子网分配
-        if (networkStruct.getAddress() == null) {
+        if (!StringUtils.hasLength(networkStruct.getAddress())) {
+            log.info("WireGuard Struct Address is empty , use default address {}", defaultConfiguration.getAddress());
             networkStruct.setAddress(defaultConfiguration.getAddress());
         }
-        if (networkStruct.getNetmask() == null) {
+        if (!StringUtils.hasLength(networkStruct.getNetmask())) {
+            log.info("WireGuard Struct Netmask is empty , use default address {}", defaultConfiguration.getAddress());
             networkStruct.setNetmask(defaultConfiguration.getNetmask());
         }
 
+        // 密钥分配
+
+        // 端口配置
+
+        // DNS ， table, MTU, 配置
 
         return networkStruct;
 
 
+    }
+
+    /**
+     * 注册已使用的内网地址
+     *
+     * @param networkStruct
+     */
+    private void registryUsedSubNetAddress(WireGuardNetworkStruct networkStruct) {
+        // 获取已配置的所有子网地址
+        List<String> usedAddress = getUsedAddress(networkStruct);
+        log.info("WireGuard Struct already used address [{}]", String.join(",", usedAddress));
+        netAddressAllocator.registerAllocatedIPs(usedAddress);
+    }
+
+    private static List<String> getUsedAddress(WireGuardNetworkStruct networkStruct) {
+        return networkStruct.getLocalAreaNetworks().stream()
+                .map(LocalAreaNetwork::getNetworkNodes)
+                .flatMap(List::stream)
+                .map(WireGuardNetworkNode::getAddress)
+                .filter(StringUtils::hasLength)
+                .toList();
     }
 
     private void initNodeWrapperMap(WireGuardNetworkStruct networkStruct) {
@@ -54,17 +140,22 @@ public class WireGuardConfigGenerator {
             for (int i = 0; i < localAreaNetwork.getNetworkNodes().size(); i++) {
                 WireGuardNetworkNode networkNode = localAreaNetwork.getNetworkNodes().get(i);
                 String hostname = networkNode.getServerNode().getHostname();
-                if (nodeWrapperMap.containsKey(hostname)) {
-                    throw new IllegalArgumentException("hostname: " + hostname + " is duplicate");
-                }
-                NetworkNodeWrapper nodeWrapper = new NetworkNodeWrapper();
-                nodeWrapper.setNode(networkNode);
-                nodeWrapper.setNetworkType(localAreaNetwork.getNetworkType());
-                nodeWrapper.setLocalAreaNetwork(localAreaNetwork.getName());
-                nodeWrapper.setBridge(isBridge(localAreaNetwork, i));
+                // 校验节点名称
+                Assert.hasLength(hostname, "hostname it must has length");
+                Assert.isTrue(!nodeWrapperMap.containsKey(hostname), "hostname: " + hostname + " is duplicate");
+                NetworkNodeWrapper nodeWrapper = buildNodeWrapper(localAreaNetwork, i, networkNode);
                 nodeWrapperMap.put(hostname, nodeWrapper);
             }
         }
+    }
+
+    private static NetworkNodeWrapper buildNodeWrapper(LocalAreaNetwork localAreaNetwork, int i, WireGuardNetworkNode networkNode) {
+        NetworkNodeWrapper nodeWrapper = new NetworkNodeWrapper();
+        nodeWrapper.setNode(networkNode);
+        nodeWrapper.setNetworkType(localAreaNetwork.getNetworkType());
+        nodeWrapper.setLocalAreaNetwork(localAreaNetwork.getName());
+        nodeWrapper.setBridge(isBridge(localAreaNetwork, i));
+        return nodeWrapper;
     }
 
     /**

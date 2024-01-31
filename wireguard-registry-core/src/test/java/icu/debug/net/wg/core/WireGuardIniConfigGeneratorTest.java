@@ -1,6 +1,7 @@
 package icu.debug.net.wg.core;
 
 import icu.debug.net.wg.core.helper.FileHelper;
+import icu.debug.net.wg.core.helper.WireGuardGenKeyHelper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.config.WireGuardInterface;
 import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
@@ -179,6 +180,13 @@ class WireGuardIniConfigGeneratorTest {
         WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct(), properties);
         WireGuardIniConfig wireGuardIniConfig = generator.buildWireGuardIniConfig("local-1");
         assertNotNull(wireGuardIniConfig.toIniString());
+        String privateKey = wireGuardIniConfig.getWgInterface().getPrivateKey();
+        List<WireGuardPeer> peers = wireGuardIniConfig.getPeers().stream().filter(peer -> peer.getName().equals("local-1")).toList();
+        assertEquals(1, peers.size());
+        peers.forEach(peer -> {
+            WireGuardGenKeyHelper.verify(privateKey, peer.getPublicKey());
+        });
+
     }
 
 }
