@@ -47,17 +47,14 @@
             "public_address": "182.1.6.1",
             "private_address": "10.1.6.1"
           },
-          "public_key": "bVlrpsmGYeVheI5g9RPcMIjhcVkW92rKi0R2mO6X7TY=",
-          "private_key": "oKcbRbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ="
+          "ignore_default": true
         },
         {
           "server_node": {
             "hostname": "group-tcloud-a-02",
             "public_address": "182.1.6.2",
             "private_address": "10.1.6.2"
-          },
-          "public_key": "bVlrpsmGYeVhxxxxeI5g9RPcMIjhcVkW92rKi0R2mO6X7TY=",
-          "private_key": "oKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ="
+          }
         },
         {
           "server_node": {

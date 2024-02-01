@@ -24,8 +24,8 @@ public class Endpoint {
 
     @Override
     public String toString() {
-        if (StringUtils.hasLength(address) && port != null) {
-            return address + ":" + port;
+        if (StringUtils.hasLength(getAddress()) && getPort() != null) {
+            return getAddress() + ":" + getPort();
         }
         return "";
     }

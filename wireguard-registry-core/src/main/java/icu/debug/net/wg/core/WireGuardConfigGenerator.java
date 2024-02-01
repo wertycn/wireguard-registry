@@ -46,13 +46,39 @@ public class WireGuardConfigGenerator {
             return;
         }
         // 子网分配
+        handlerSubNetallecte(node);
+
+        // 处理密钥分配
+        handlerKeyAllecte(node);
+
+        // 默认属性配置
+        handlerDefaultBaseProp(node);
+    }
+
+    private void handlerSubNetallecte(WireGuardNetworkNode node) {
         if (!StringUtils.hasLength(node.getAddress()) || netAddressAllocator.isInSubnet(node.getAddress())) {
             netAddressAllocator.allocateIP().ifPresentOrElse(node::setAddress, () -> {
                 throw new IllegalArgumentException("WireGuard Struct node address is empty , and can not allocate address");
             });
         }
+    }
 
+    private void handlerDefaultBaseProp(WireGuardNetworkNode node) {
+        if (node.getListenPort() == null) {
+            node.setListenPort(defaultConfiguration.getListenPort());
+        }
+        if (CollectionUtils.isEmpty(node.getDns())) {
+            node.setDns(defaultConfiguration.getDns());
+        }
+        if (!StringUtils.hasLength(node.getTable())) {
+            node.setTable(defaultConfiguration.getTable());
+        }
+        if (node.getMtu() == null) {
+            node.setMtu(defaultConfiguration.getMtu());
+        }
+    }
 
+    private static void handlerKeyAllecte(WireGuardNetworkNode node) {
         // 密钥分配
         if (!StringUtils.hasLength(node.getPrivateKey()) || !WireGuardGenKeyHelper.formatValid(node.getPrivateKey())) {
             String privateKey = WireGuardGenKeyHelper.genPrivateKey();
@@ -67,19 +93,6 @@ public class WireGuardConfigGenerator {
             String privateKey = WireGuardGenKeyHelper.genPrivateKey();
             node.setPrivateKey(privateKey);
             node.setPublicKey(WireGuardGenKeyHelper.genPubKeyByPrivateKey(privateKey));
-        }
-
-        if (node.getListenPort() == null) {
-            node.setListenPort(defaultConfiguration.getListenPort());
-        }
-        if (CollectionUtils.isEmpty(node.getDns())) {
-            node.setDns(defaultConfiguration.getDns());
-        }
-        if (!StringUtils.hasLength(node.getTable())) {
-            node.setTable(defaultConfiguration.getTable());
-        }
-        if (node.getMtu() == null) {
-            node.setMtu(defaultConfiguration.getMtu());
         }
     }
 

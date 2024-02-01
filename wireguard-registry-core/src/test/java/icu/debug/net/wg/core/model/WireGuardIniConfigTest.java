@@ -51,5 +51,6 @@ class WireGuardIniConfigTest {
         config.setPeers(Arrays.asList(peer, peer));
 
         assertEquals(TEST_INI_CONTENT, config.toIniString());
+        assertEquals("wg0",config.getName());
     }
 }

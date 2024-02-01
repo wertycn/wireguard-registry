@@ -1,5 +1,6 @@
 package icu.debug.net.wg.core;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import icu.debug.net.wg.core.helper.FileHelper;
 import icu.debug.net.wg.core.helper.WireGuardGenKeyHelper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
@@ -26,15 +27,22 @@ class WireGuardIniConfigGeneratorTest {
 
     @SneakyThrows
     private static WireGuardNetworkStruct getWireGuardNetworkStruct() {
-        String result = FileHelper.readResource("wireguard-network-example.json");
+        return getWireGuardNetworkStruct("wireguard-network-example.json");
+    }
+
+    @SneakyThrows
+    private static WireGuardNetworkStruct getWireGuardNetworkStruct(String name) {
+        String result = FileHelper.readResource(name);
         return WireGuardNetworkStruct.ofJson(result);
     }
+
 
     @Test
     @DisplayName("测试静态配置内容解析")
     void test() throws IOException {
         String result = FileHelper.readResource("wireguard-network-example.json");
         assertDoesNotThrow(() -> WireGuardNetworkStruct.ofJson(result), "JSON 序列化解析出现异常");
+        assertThrows(IllegalArgumentException.class, () -> WireGuardNetworkStruct.ofJson("xx"), "异常JSON 序列化解析校验");
     }
 
     @Test
@@ -211,7 +219,21 @@ class WireGuardIniConfigGeneratorTest {
             peers.forEach(peer -> {
                 WireGuardGenKeyHelper.verify(privateKey, peer.getPublicKey());
             });
+            System.out.println("=========================");
+            System.out.println(s);
             System.out.println(wireGuardIniConfig.toIniString());
+            System.out.println("=========================");
+
         });
+    }
+
+    @Test
+    @DisplayName("忽略默认属性测试")
+    void testIgnoreDefaultMerge() throws IOException {
+        WireGuardNetProperties properties = getWireGuardNetProperties();
+
+        WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct("wireguard-network-example-v2.json"), properties);
+        Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigs();
+        assertNull(stringWireGuardIniConfigMap.get("group-tcloud-a-01").getWgInterface().getPrivateKey());
     }
 }
