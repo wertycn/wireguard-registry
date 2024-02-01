@@ -30,11 +30,11 @@ public class WireGuardGenKeyHelper {
         try {
             byte[] privateKeyBytes = Base64.getDecoder().decode(privateKey);
             byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey);
-            byte[] message = "hello".getBytes();
-            byte[] signature = PROVIDER.calculateSignature(PROVIDER.getRandom(32), privateKeyBytes, message);
+            byte[] message = new byte[128 * 128];
+            byte[] signature = PROVIDER.calculateSignature(PROVIDER.getRandom(64), privateKeyBytes, message);
             return PROVIDER.verifySignature(publicKeyBytes, message, signature);
         } catch (Exception e) {
-            log.warn("sign verify error private key {} public key {} :{}",privateKey, publicKey, e.getMessage());
+            log.warn("sign verify error private key {} public key {} :{}", privateKey, publicKey, e.getMessage());
             return false;
         }
     }

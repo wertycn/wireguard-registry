@@ -36,11 +36,7 @@ public class WireGuardConfigGenerator {
     }
 
     private void appendDefaultProperties() {
-        this.networkStruct.getLocalAreaNetworks()
-                .stream()
-                .map(LocalAreaNetwork::getNetworkNodes)
-                .flatMap(List::stream)
-                .forEach(this::appendDefaultProperties);
+        this.networkStruct.getLocalAreaNetworks().stream().map(LocalAreaNetwork::getNetworkNodes).flatMap(List::stream).forEach(this::appendDefaultProperties);
 
     }
 
@@ -127,12 +123,7 @@ public class WireGuardConfigGenerator {
     }
 
     private static List<String> getUsedAddress(WireGuardNetworkStruct networkStruct) {
-        return networkStruct.getLocalAreaNetworks().stream()
-                .map(LocalAreaNetwork::getNetworkNodes)
-                .flatMap(List::stream)
-                .map(WireGuardNetworkNode::getAddress)
-                .filter(StringUtils::hasLength)
-                .toList();
+        return networkStruct.getLocalAreaNetworks().stream().map(LocalAreaNetwork::getNetworkNodes).flatMap(List::stream).map(WireGuardNetworkNode::getAddress).filter(StringUtils::hasLength).toList();
     }
 
     private void initNodeWrapperMap(WireGuardNetworkStruct networkStruct) {
@@ -170,15 +161,20 @@ public class WireGuardConfigGenerator {
     }
 
     public WireGuardIniConfig buildWireGuardIniConfig(String hostname) {
-        if (!this.nodeWrapperMap.containsKey(hostname)) {
-            throw new IllegalArgumentException("hostname: " + hostname + " is not exist");
-        }
+        Assert.isTrue(this.nodeWrapperMap.containsKey(hostname), "hostname: " + hostname + " is not exist");
+
         NetworkNodeWrapper requestWrapper = this.nodeWrapperMap.get(hostname);
         List<WireGuardPeer> peers = new ArrayList<>();
         nodeWrapperMap.forEach((key, value) -> peers.add(value.buildPeer(requestWrapper)));
         String name = this.networkStruct.getName();
         WireGuardInterface wgInterface = requestWrapper.toInterface();
         return new WireGuardIniConfig(name, wgInterface, peers);
+    }
+
+    public Map<String, WireGuardIniConfig> buildWireGuardIniConfigs() {
+        Map<String, WireGuardIniConfig> result = new HashMap<>();
+        nodeWrapperMap.forEach((key, value) -> result.put(key, buildWireGuardIniConfig(key)));
+        return result;
     }
 
 }

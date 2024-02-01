@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class WireGuardGenKeyHelperTest {
 
@@ -22,20 +21,28 @@ class WireGuardGenKeyHelperTest {
     void testGenPubKeyByPrivateKey() {
         String privateKey = "oKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ=";
         String pubKey = WireGuardGenKeyHelper.genPubKeyByPrivateKey(privateKey);
-        Assertions.assertEquals("bVlrpsmGYeVheI5g9RPcMIjhcVkW92rKi0R2mO6X7TY=", pubKey);
+        assertEquals("bVlrpsmGYeVheI5g9RPcMIjhcVkW92rKi0R2mO6X7TY=", pubKey);
     }
 
 
     @Test
     @DisplayName("测试密钥是否匹配")
     void testVerify() {
-        // TODO: 2021/8/3 0003 无法通过验证
-        assertFalse(WireGuardGenKeyHelper.verify("oKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ=", "bVlrpsmGYeVheI5g9RPcMIjhcVkW92rKi0R2mO6X7TY="));
+        String privateKey = "oKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ=";
+        String publicKeyExample = "bVlrpsmGYeVheI5g9RPcMIjhcVkW92rKi0R2mO6X7TY=";
+        assertTrue(WireGuardGenKeyHelper.verify(privateKey, publicKeyExample));
+
+        String pk = WireGuardGenKeyHelper.genPrivateKey();
+        String pubKey = WireGuardGenKeyHelper.genPubKeyByPrivateKey(pk);
+        assertTrue(WireGuardGenKeyHelper.verify(pk, pubKey));
+
+        assertFalse(WireGuardGenKeyHelper.verify(pk, publicKeyExample));
+        assertFalse(WireGuardGenKeyHelper.verify(pk, "xxxx"));
     }
 
     @Test
     @DisplayName("验证密钥格式是否正确")
-    void testFormatValid(){
+    void testFormatValid() {
         assertTrue(WireGuardGenKeyHelper.formatValid("oKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ="));
         assertFalse(WireGuardGenKeyHelper.formatValid("osKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ="));
     }

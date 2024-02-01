@@ -17,6 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -174,9 +175,7 @@ class WireGuardIniConfigGeneratorTest {
     @Test
     @DisplayName("指定节点获取WireGuard组网配置")
     void testGetIniConfigByHostname() {
-        WireGuardNetProperties properties = new WireGuardNetProperties();
-        properties.setNetmask("255.255.255.0");
-        properties.setAddress("10.201.0.1");
+        WireGuardNetProperties properties = getWireGuardNetProperties();
         WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct(), properties);
         WireGuardIniConfig wireGuardIniConfig = generator.buildWireGuardIniConfig("local-1");
         assertNotNull(wireGuardIniConfig.toIniString());
@@ -186,7 +185,33 @@ class WireGuardIniConfigGeneratorTest {
         peers.forEach(peer -> {
             WireGuardGenKeyHelper.verify(privateKey, peer.getPublicKey());
         });
+        System.out.println(wireGuardIniConfig.toIniString());
 
     }
 
+    private static WireGuardNetProperties getWireGuardNetProperties() {
+        WireGuardNetProperties properties = new WireGuardNetProperties();
+        properties.setNetmask("255.255.255.0");
+        properties.setAddress("10.201.0.1");
+        return properties;
+    }
+
+    @Test
+    void buildWireGuardIniConfigs() {
+
+        WireGuardNetProperties properties = getWireGuardNetProperties();
+        WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct(), properties);
+
+        Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigs();
+        stringWireGuardIniConfigMap.forEach((s, wireGuardIniConfig) -> {
+            assertNotNull(wireGuardIniConfig.toIniString());
+            String privateKey = wireGuardIniConfig.getWgInterface().getPrivateKey();
+            List<WireGuardPeer> peers = wireGuardIniConfig.getPeers().stream().filter(peer -> peer.getName().equals(s)).toList();
+            assertEquals(1, peers.size());
+            peers.forEach(peer -> {
+                WireGuardGenKeyHelper.verify(privateKey, peer.getPublicKey());
+            });
+            System.out.println(wireGuardIniConfig.toIniString());
+        });
+    }
 }
