@@ -9,6 +9,7 @@ import icu.debug.net.wg.core.model.network.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -36,7 +37,11 @@ public class WireGuardConfigGenerator {
     }
 
     private void appendDefaultProperties() {
-        this.networkStruct.getLocalAreaNetworks().stream().map(LocalAreaNetwork::getNetworkNodes).flatMap(List::stream).forEach(this::appendDefaultProperties);
+        this.networkStruct.getLocalAreaNetworks().stream()
+                .filter(item -> item.getNetworkNodes() != null)
+                .map(LocalAreaNetwork::getNetworkNodes)
+                .flatMap(List::stream)
+                .forEach(this::appendDefaultProperties);
 
     }
 
@@ -136,13 +141,23 @@ public class WireGuardConfigGenerator {
     }
 
     private static List<String> getUsedAddress(WireGuardNetworkStruct networkStruct) {
-        return networkStruct.getLocalAreaNetworks().stream().map(LocalAreaNetwork::getNetworkNodes).flatMap(List::stream).map(WireGuardNetworkNode::getAddress).filter(StringUtils::hasLength).toList();
+        return networkStruct.getLocalAreaNetworks()
+                .stream()
+                .filter(item -> item.getNetworkNodes() != null)
+                .map(LocalAreaNetwork::getNetworkNodes)
+                .flatMap(List::stream)
+                .map(WireGuardNetworkNode::getAddress)
+                .filter(StringUtils::hasLength).toList();
     }
 
     private void initNodeWrapperMap(WireGuardNetworkStruct networkStruct) {
         for (LocalAreaNetwork localAreaNetwork : networkStruct.getLocalAreaNetworks()) {
-            for (int i = 0; i < localAreaNetwork.getNetworkNodes().size(); i++) {
-                WireGuardNetworkNode networkNode = localAreaNetwork.getNetworkNodes().get(i);
+            List<WireGuardNetworkNode> networkNodes = localAreaNetwork.getNetworkNodes();
+            if (ObjectUtils.isEmpty(networkNodes)) {
+                continue;
+            }
+            for (int i = 0; i < networkNodes.size(); i++) {
+                WireGuardNetworkNode networkNode = networkNodes.get(i);
                 String hostname = networkNode.getServerNode().getHostname();
                 // 校验节点名称
                 Assert.hasLength(hostname, "hostname it must has length");

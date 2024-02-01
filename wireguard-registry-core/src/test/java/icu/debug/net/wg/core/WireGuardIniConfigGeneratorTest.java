@@ -236,4 +236,5 @@ class WireGuardIniConfigGeneratorTest {
         Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigs();
         assertNull(stringWireGuardIniConfigMap.get("group-tcloud-a-01").getWgInterface().getPrivateKey());
     }
+    
 }

@@ -57,6 +57,7 @@ class NetAddressAllocatorTest {
         assertDoesNotThrow(() -> netAddressAllocator.registerAllocatedIP("10.2.0.1"));
         assertTrue(netAddressAllocator.isAllocated("10.2.0.1"));
         assertDoesNotThrow(() -> netAddressAllocator.registerAllocatedIP("10.3.1.1"));
+        assertDoesNotThrow(() -> netAddressAllocator.registerAllocatedIP("10.2.0.1"));
 
     }
 

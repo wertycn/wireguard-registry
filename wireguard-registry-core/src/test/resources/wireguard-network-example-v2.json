@@ -74,22 +74,27 @@
             "hostname": "group-tcloud-b-01",
             "public_address": "183.1.7.1",
             "private_address": "10.2.7.1"
-          }
+          },
+          "ignore_default": true,
+          "address": null,
+          "listen_port": 33
+        },
+        {
+          "server_node": {
+            "hostname": "group-tcloud-b-05",
+            "public_address": "183.1.7.2",
+            "private_address": "10.2.7.2"
+          },
+          "ignore_default": true,
+          "address": "10.201.1.9",
+          "listen_port": null
         }
       ]
     },
     {
       "name": "阿里云-C账号",
       "network_type": "CLOUD",
-      "network_nodes": [
-        {
-          "server_node": {
-            "hostname": "group-ali-cloud-C-01",
-            "public_address": "183.1.8.1",
-            "private_address": "10.3.8.1"
-          }
-        }
-      ]
+      "network_nodes": null
     }
   ]
 }
