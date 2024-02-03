@@ -1,0 +1,16 @@
+wireguard:
+  default:
+    address: "10.201.1.1"
+    netmask: "255.255.255.0"
+    listenPort: 51820
+    dns:
+      - "1.1.1.1"
+      - "8.8.8.8"
+    table: "auto"
+    mtu: 1500
+    preUp:
+#      - "ip rule add ipproto tcp dport 22 table 1234"
+    postUp:
+      - "echo 'hello wireguard'"
+    preDown:
+    postDown:

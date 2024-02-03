@@ -41,15 +41,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.modulith</groupId>
-            <artifactId>spring-modulith-starter-core</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.modulith</groupId>-->
+<!--            <artifactId>spring-modulith-starter-core</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.shell</groupId>
             <artifactId>spring-shell-starter</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -71,11 +70,11 @@
             <scope>runtime</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.modulith</groupId>
-            <artifactId>spring-modulith-observability</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.modulith</groupId>-->
+<!--            <artifactId>spring-modulith-observability</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -91,11 +90,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.modulith</groupId>
-            <artifactId>spring-modulith-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.modulith</groupId>-->
+<!--            <artifactId>spring-modulith-starter-test</artifactId>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -106,35 +105,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
-                <groupId>org.springframework.modulith</groupId>
-                <artifactId>spring-modulith-bom</artifactId>
-                <version>${spring-modulith.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>org.springframework.modulith</groupId>-->
+<!--                <artifactId>spring-modulith-bom</artifactId>-->
+<!--                <version>${spring-modulith.version}</version>-->
+<!--                <type>pom</type>-->
+<!--                <scope>import</scope>-->
+<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.graalvm.buildtools</groupId>
-                <artifactId>native-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

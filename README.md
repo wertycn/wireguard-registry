@@ -25,6 +25,5 @@ WireGuard 轻量注册中心，用于 WireGuard 配置的管理,生成，下发�
 []  client  
     - 轻量CLI命令 快速生成多文件配置
 [] API server
-    基于
-[] CLI 客户端   
+    - 提供在线配置生成服务
 [] 流量数据监控采集  
