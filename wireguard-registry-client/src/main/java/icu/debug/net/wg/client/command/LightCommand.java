@@ -1,6 +1,8 @@
 package icu.debug.net.wg.client.command;
 
 import icu.debug.net.wg.client.module.ConfigGenerateModule;
+import org.springframework.shell.command.annotation.Command;
+import org.springframework.shell.context.InteractionMode;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
@@ -14,7 +16,7 @@ import java.util.List;
  * @author hanjinxiang@debug.icu
  * @date 2024-02-04 0:44
  */
-@ShellComponent("light")
+@Command(interactionMode = InteractionMode.NONINTERACTIVE)
 public class LightCommand {
 
     private final ConfigGenerateModule module;
@@ -23,7 +25,7 @@ public class LightCommand {
         this.module = module;
     }
 
-    @ShellMethod(key = "generate")
+    @Command(command = "generate", alias = "gen", description = "基于组网规划配置生成组网配置文件", interactionMode = InteractionMode.NONINTERACTIVE)
     public String helloWorld(
             @ShellOption(value = "struct_file_path", help = "网络规划JSON配置") String structFile,
             @ShellOption(value = "output_path", defaultValue = "./", help = "生成结果存储路径") String output

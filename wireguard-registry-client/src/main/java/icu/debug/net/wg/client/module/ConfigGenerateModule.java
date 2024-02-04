@@ -5,6 +5,7 @@ import icu.debug.net.wg.core.helper.FileHelper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
 import icu.debug.net.wg.core.model.network.WireGuardNetworkStruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -22,6 +23,7 @@ import java.util.Map;
  * @author hanjinxiang@debug.icu
  * @date 2024-02-04 1:53
  */
+@Slf4j
 @Component
 public class ConfigGenerateModule {
 
@@ -29,6 +31,7 @@ public class ConfigGenerateModule {
 
     public ConfigGenerateModule(WireGuardNetProperties defaultProperties) {
         this.defaultProperties = defaultProperties;
+        log.info("default properties {}", this.defaultProperties);
     }
 
     public List<Path> generateFiles(String structFilePath, String outputPath) {
@@ -80,7 +83,7 @@ public class ConfigGenerateModule {
         try {
             return FileHelper.read(structFilePath);
         } catch (IOException e) {
-            throw new IllegalArgumentException("file: [" + structFilePath + "] struct file load failed:" + e.getMessage(), e);
+            throw new IllegalArgumentException("file: [" + Paths.get(structFilePath) + "] struct file load failed:" + e.getMessage(), e);
         }
     }
 }

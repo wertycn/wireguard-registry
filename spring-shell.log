@@ -1,0 +1,7 @@
+1707063293854:你好
+1707063298440:gen
+1707063304922:ls
+1707063306664:help
+1707063408183:generate help
+1707063432086:generate --struct_file_path ./
+1707063473729:generate --struct_file_path D:\\mycode\\wgnet-register\\wireguard-registry-core\\src\\test\\resources\\wireguard-network-example.json
