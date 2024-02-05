@@ -33,6 +33,12 @@ public class WireGuardNetworkNode {
     private String address;
 
 
+    private Integer listenPort;
+
+    /**
+     * 连接心跳时间
+     */
+    private Integer keepalive;
     /**
      * 公钥
      */
@@ -43,7 +49,6 @@ public class WireGuardNetworkNode {
      */
     private String privateKey;
 
-    private Integer listenPort;
 
     private List<String> dns;
 
@@ -105,6 +110,9 @@ public class WireGuardNetworkNode {
         }
         if (!ObjectUtils.isEmpty(address)) {
             peer.setAllowedIPs(List.of(address));
+        }
+        if (!ObjectUtils.isEmpty(keepalive) && keepalive != 0) {
+            peer.setPersistentKeepalive(keepalive);
         }
         return peer;
     }

@@ -1,0 +1,142 @@
+{
+  "type": "fieldSet",
+  "body": [
+    {
+      "type": "group",
+      "id": "u:2e4408ae323b",
+      "body": [
+        {
+          "type": "switch",
+          "name": "ignore_default",
+          "label": "不合并全局配置",
+          "desc": "少数特殊节点可选不合并全局配置",
+          "id": "u:47cdb581780c"
+        },
+        {
+          "type": "input-text",
+          "name": "address",
+          "label": "虚拟网地址",
+          "id": "u:47cdb581780c"
+        },
+        {
+          "type": "input-number",
+          "name": "listen_port",
+          "label": "监听端口",
+          "id": "u:a66a1abf37c9"
+        },
+        {
+          "type": "input-number",
+          "name": "keeplive",
+          "label": "心跳周期(s)",
+          "desc": "大于0时生效，用于内网主机主动向其他网络宣告",
+          "id": "u:a66a1abf37c9"
+        }
+      ]
+    },
+    {
+      "type": "group",
+      "id": "u:2e4408ae323b",
+      "body": [
+        {
+          "type": "input-text",
+          "name": "public_key",
+          "label": "公钥",
+          "id": "u:47cdb581780c"
+        },
+        {
+          "type": "input-text",
+          "name": "private_key",
+          "label": "私钥",
+          "id": "u:076bc3f7da02"
+        },
+        {
+          "type": "input-text",
+          "name": "table",
+          "label": "table",
+          "id": "u:a5cc4b7c2a8c"
+        },
+        {
+          "type": "input-text",
+          "name": "mtu",
+          "label": "MTU",
+          "id": "u:1605a98097b3"
+        }
+      ]
+    },
+    {
+      "type": "combo",
+      "name": "dns",
+      "label": "DNS",
+      "id": "u:d10372422986",
+      "multiple": true,
+      "flat": true,
+      "items": [
+        {
+          "type": "input-text",
+          "id": "u:e4623997c61a",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "type": "combo",
+      "name": "pre_up",
+      "label": "Pre Up",
+      "multiple": true,
+      "flat": true,
+      "items": [
+        {
+          "type": "input-text",
+          "id": "u:eaf9dabaf1b9"
+        }
+      ],
+      "id": "u:ddfdbe189b15"
+    },
+    {
+      "type": "combo",
+      "name": "post_up",
+      "label": "Post Up",
+      "multiple": true,
+      "flat": true,
+      "items": [
+        {
+          "type": "input-text",
+          "id": "u:96c73cc30c5e"
+        }
+      ],
+      "id": "u:86fbd74b6827"
+    },
+    {
+      "type": "combo",
+      "name": "pre_down",
+      "label": "Pre Down",
+      "multiple": true,
+      "flat": true,
+      "items": [
+        {
+          "type": "input-text",
+          "id": "u:05c23410dba6"
+        }
+      ],
+      "id": "u:5c970b220cb7"
+    },
+    {
+      "type": "combo",
+      "name": "post_down",
+      "label": "Post Down",
+      "multiple": true,
+      "flat": true,
+      "items": [
+        {
+          "type": "input-text",
+          "id": "u:74a4af9fb813"
+        }
+      ],
+      "id": "u:d035322d0e1e"
+    }
+  ],
+  "title": "高级设置",
+  "collapsable": true,
+  "id": "u:514456f57b90",
+  "collapsed": true
+}
