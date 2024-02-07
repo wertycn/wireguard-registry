@@ -380,7 +380,22 @@
                       "collapsed": true
                     }
                   ],
-                  "id": "u:95c630108ce9"
+                  "id": "u:95c630108ce9",
+                  "strictMode": true,
+                  "syncFields": [],
+                  "addable": true,
+                  "removable": false,
+                  "draggable": false,
+                  "flat": false,
+                  "multiple": true,
+                  "minLength": 1,
+                  "addBtn": {
+                    "type": "button",
+                    "label": "新增网络节点",
+                    "level": "primary",
+                    "block": true,
+                    "id": "u:4ef38de4d2cd"
+                  }
                 }
               ],
               "multiple": true,
@@ -414,7 +429,16 @@
         }
       ],
       "feat": "Insert",
-      "debug": true
+      "debug": true,
+      "dsType": "api",
+      "api": {
+        "url": "/v1/generate/submit",
+        "method": "post",
+        "requestAdaptor": "",
+        "adaptor": "",
+        "messages": {},
+        "dataType": "json"
+      }
     }
   ],
   "id": "u:bd1b3458a0bb"

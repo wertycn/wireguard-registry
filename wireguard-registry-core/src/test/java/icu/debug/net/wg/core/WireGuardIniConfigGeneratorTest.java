@@ -1,6 +1,5 @@
 package icu.debug.net.wg.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import icu.debug.net.wg.core.helper.FileHelper;
 import icu.debug.net.wg.core.helper.WireGuardGenKeyHelper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
@@ -9,14 +8,10 @@ import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
 import icu.debug.net.wg.core.model.config.WireGuardPeer;
 import icu.debug.net.wg.core.model.network.*;
 import lombok.SneakyThrows;
-import org.apache.commons.net.util.SubnetUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -210,7 +205,7 @@ class WireGuardIniConfigGeneratorTest {
         WireGuardNetProperties properties = getWireGuardNetProperties();
         WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct(), properties);
 
-        Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigs();
+        Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigMap();
         stringWireGuardIniConfigMap.forEach((s, wireGuardIniConfig) -> {
             assertNotNull(wireGuardIniConfig.toIniString());
             String privateKey = wireGuardIniConfig.getWgInterface().getPrivateKey();
@@ -233,7 +228,7 @@ class WireGuardIniConfigGeneratorTest {
         WireGuardNetProperties properties = getWireGuardNetProperties();
 
         WireGuardConfigGenerator generator = new WireGuardConfigGenerator(getWireGuardNetworkStruct("wireguard-network-example-v2.json"), properties);
-        Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigs();
+        Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigMap();
         assertNull(stringWireGuardIniConfigMap.get("group-tcloud-a-01").getWgInterface().getPrivateKey());
     }
     

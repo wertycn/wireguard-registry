@@ -16,13 +16,14 @@
     </parent>
     <groupId>icu.debug.net.wg</groupId>
     <artifactId>wgnet-registry</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${project.version}</version>
     <name>wgnet-register</name>
     <description>WireGuard Net Registry</description>
     <properties>
         <java.version>17</java.version>
         <spring-modulith.version>1.1.2</spring-modulith.version>
         <spring-shell.version>3.2.0</spring-shell.version>
+        <project.version>0.0.1-SNAPSHOT</project.version>
     </properties>
     <dependencies>
         <dependency>
@@ -35,19 +36,6 @@
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
             <version>3.10.0</version>
-        </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-web</artifactId>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.modulith</groupId>-->
-<!--            <artifactId>spring-modulith-starter-core</artifactId>-->
-<!--        </dependency>-->
-        <dependency>
-            <groupId>org.springframework.shell</groupId>
-            <artifactId>spring-shell-starter</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -69,12 +57,6 @@
             <artifactId>micrometer-registry-prometheus</artifactId>
             <scope>runtime</scope>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.modulith</groupId>-->
-<!--            <artifactId>spring-modulith-observability</artifactId>-->
-<!--            <scope>runtime</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -90,11 +72,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.modulith</groupId>-->
-<!--            <artifactId>spring-modulith-starter-test</artifactId>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -105,13 +82,17 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.modulith</groupId>-->
-<!--                <artifactId>spring-modulith-bom</artifactId>-->
-<!--                <version>${spring-modulith.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
+            <dependency>
+                <groupId>icu.debug.net.wg.core</groupId>
+                <artifactId>wireguard-registry-core</artifactId>
+                <version>${project.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.11.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

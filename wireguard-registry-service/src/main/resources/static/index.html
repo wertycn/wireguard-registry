@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8"/>
+    <title>HdminCube</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1"
+    />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.css"/>
+    <style>
+        html,
+        body,
+        .app-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<div id="root" class="app-wrapper"></div>
+<script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.min.js"></script>
+<script type="text/javascript">
+    let myAmis;
+    (function () {
+        myAmis = amisRequire('amis/embed');
+        // 获取页面参数
+        // 渲染页面
+        let page = {
+            "type": "page",
+            "body": {
+                "type": "service",
+                "schemaApi": "get:/options/form.json"
+            }
+        }
+        myAmis.embed("#root", page);
+
+    })();
+
+
+</script>
+</body>
+</html>

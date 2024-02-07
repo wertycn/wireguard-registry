@@ -41,7 +41,7 @@ public class ConfigGenerateModule {
         WireGuardNetworkStruct struct = WireGuardNetworkStruct.ofJson(content);
         // 生成配置内容
         WireGuardConfigGenerator generator = new WireGuardConfigGenerator(struct, defaultProperties);
-        Map<String, WireGuardIniConfig> configMap = generator.buildWireGuardIniConfigs();
+        Map<String, WireGuardIniConfig> configMap = generator.buildWireGuardIniConfigMap();
         // 生成配置文件
         initOutputDir(outputPath);
         List<Path> result = new ArrayList<>();

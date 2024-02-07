@@ -13,6 +13,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class WireGuardConfigGenerator {
@@ -116,13 +117,6 @@ public class WireGuardConfigGenerator {
             log.info("WireGuard Struct Netmask is empty , use default address {}", defaultConfiguration.getAddress());
             networkStruct.setNetmask(defaultConfiguration.getNetmask());
         }
-
-        // 密钥分配
-
-        // 端口配置
-
-        // DNS ， table, MTU, 配置
-
         return networkStruct;
 
 
@@ -189,20 +183,30 @@ public class WireGuardConfigGenerator {
     }
 
     public WireGuardIniConfig buildWireGuardIniConfig(String hostname) {
-        Assert.isTrue(this.nodeWrapperMap.containsKey(hostname), "hostname: " + hostname + " is not exist");
+        return buildConfig(hostname).getConfig();
+    }
 
+    public NetworkNodeConfigWrapper buildConfig(String hostname) {
+        Assert.isTrue(this.nodeWrapperMap.containsKey(hostname), "hostname: " + hostname + " is not exist");
         NetworkNodeWrapper requestWrapper = this.nodeWrapperMap.get(hostname);
         List<WireGuardPeer> peers = new ArrayList<>();
         nodeWrapperMap.forEach((key, value) -> peers.add(value.buildPeer(requestWrapper)));
         String name = this.networkStruct.getName();
         WireGuardInterface wgInterface = requestWrapper.toInterface();
-        return new WireGuardIniConfig(name, wgInterface, peers);
+        WireGuardIniConfig config = new WireGuardIniConfig(name, wgInterface, peers);
+        return new NetworkNodeConfigWrapper(requestWrapper.getNode(), config);
     }
 
-    public Map<String, WireGuardIniConfig> buildWireGuardIniConfigs() {
-        Map<String, WireGuardIniConfig> result = new HashMap<>();
-        nodeWrapperMap.forEach((key, value) -> result.put(key, buildWireGuardIniConfig(key)));
+    public List<NetworkNodeConfigWrapper> buildWireGuardIniConfigs() {
+        List<NetworkNodeConfigWrapper> result = new ArrayList<>();
+        nodeWrapperMap.forEach((key, value) -> result.add(buildConfig(key)));
         return result;
+    }
+
+    public Map<String, WireGuardIniConfig> buildWireGuardIniConfigMap() {
+        return buildWireGuardIniConfigs()
+                .stream()
+                .collect(Collectors.toMap(NetworkNodeConfigWrapper::getHostName, NetworkNodeConfigWrapper::getConfig));
     }
 
 }
