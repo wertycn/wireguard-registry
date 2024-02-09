@@ -1,10 +1,10 @@
 {
-  "type": "form",
-  "id": "u:7fdc0deb3da2",
-  "title": "WireGuard虚拟组网",
+  "type": "page",
+  "title": "WireGuard组网",
   "body": [
     {
       "type": "wizard",
+      "id": "u:b46881c6699b",
       "steps": [
         {
           "title": "全局配置",
@@ -154,13 +154,22 @@
               ]
             }
           ],
-          "id": "u:2e51389a9b15"
+          "id": "u:2e51389a9b15",
+          "mode": "normal",
+          "actions": [
+            {
+              "label": "下一步",
+              "type": "button",
+              "actionType": "next",
+              "id": "u:c570a10ca376"
+            }
+          ]
         },
         {
           "title": "组网结构",
           "body": [
             {
-              "name": "network_stuct",
+              "name": "network_struct",
               "type": "combo",
               "multiLine": true,
               "items": [
@@ -427,41 +436,40 @@
               ],
               "id": "u:18678c717e50"
             }
-          ]
+          ],
+          "actions": [
+            {
+              "label": "上一步",
+              "type": "button",
+              "actionType": "prev",
+              "id": "u:c570a10ca376"
+            },
+            {
+              "label": "下一步",
+              "type": "button",
+              "actionType": "next",
+              "id": "u:c570a10ca376"
+            }
+          ],
+          "mode": "normal"
         },
         {
           "title": "生成配置",
           "body": [
             {
               "type": "tpl",
-              "tpl": "这是最后一步了",
-              "wrapperComponent": "",
-              "inline": false
+              "language": "json",
+              "inline": false,
+              "tpl": "${json($$)}"
             }
-          ]
+          ],
+          "mode": "normal"
         }
       ],
-      "id": "u:b46881c6699b",
-      "name": "test"
+      "name": "test",
+      "debug": true,
+      "mode": "horizontal"
     }
   ],
-  "actions": [
-    {
-      "type": "submit",
-      "label": "提交",
-      "primary": true,
-      "id": "u:c2fe0131fcc7"
-    }
-  ],
-  "feat": "Insert",
-  "debug": true,
-  "dsType": "api",
-  "api": {
-    "url": "/v1/generate/submit",
-    "method": "post",
-    "requestAdaptor": "",
-    "adaptor": "",
-    "messages": {},
-    "dataType": "json"
-  }
+  "id": "u:bd1b3458a0bb"
 }
