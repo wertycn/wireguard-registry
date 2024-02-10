@@ -10,7 +10,7 @@
           "title": "全局配置",
           "body": [
             {
-              "name": "default",
+              "name": "properties",
               "label": "全局配置",
               "type": "combo",
               "id": "u:c80043a2e583",
@@ -25,7 +25,8 @@
                       "name": "name",
                       "label": "配置名称",
                       "required": true,
-                      "id": "u:a4bc390b2df9"
+                      "id": "u:a4bc390b2df9",
+                      "value": "WireGuard-VM-NET"
                     },
                     {
                       "type": "input-text",
@@ -33,6 +34,7 @@
                       "label": "子网地址",
                       "desc": "用于自动为虚拟网分配子网IP",
                       "required": true,
+                      "value": "10.201.1.1",
                       "id": "u:a4bc390b2df9"
                     },
                     {
@@ -41,6 +43,7 @@
                       "label": "子网掩码",
                       "id": "u:a4bc390b2df9",
                       "desc": "用于自动为虚拟网分配子网IP",
+                      "value": "255.255.255.0",
                       "required": true
                     }
                   ]
@@ -56,6 +59,7 @@
                           "type": "input-number",
                           "name": "listen_port",
                           "label": "监听端口",
+                          "value": 9980,
                           "id": "u:a66a1abf37c9"
                         },
                         {
@@ -155,21 +159,13 @@
             }
           ],
           "id": "u:2e51389a9b15",
-          "mode": "normal",
-          "actions": [
-            {
-              "label": "下一步",
-              "type": "button",
-              "actionType": "next",
-              "id": "u:c570a10ca376"
-            }
-          ]
+          "mode": "normal"
         },
         {
           "title": "组网结构",
           "body": [
             {
-              "name": "network_struct",
+              "name": "struct",
               "type": "combo",
               "multiLine": true,
               "items": [
@@ -212,6 +208,7 @@
                               "disabled": true
                             }
                           ],
+                          "value": "CLOUD",
                           "required": true,
                           "id": "u:34f4587b6140"
                         }
@@ -417,7 +414,6 @@
                   ],
                   "multiple": true,
                   "strictMode": true,
-                  "syncFields": [],
                   "minLength": 1,
                   "draggable": true,
                   "addBtn": {
@@ -437,37 +433,13 @@
               "id": "u:18678c717e50"
             }
           ],
-          "actions": [
-            {
-              "label": "上一步",
-              "type": "button",
-              "actionType": "prev",
-              "id": "u:c570a10ca376"
-            },
-            {
-              "label": "下一步",
-              "type": "button",
-              "actionType": "next",
-              "id": "u:c570a10ca376"
-            }
-          ],
-          "mode": "normal"
-        },
-        {
-          "title": "生成配置",
-          "body": [
-            {
-              "type": "tpl",
-              "language": "json",
-              "inline": false,
-              "tpl": "${json($$)}"
-            }
-          ],
           "mode": "normal"
         }
       ],
       "name": "test",
       "debug": true,
+      "desc": "提交后展示配置列表，提供复制及查看功能，后续提供命令生成和下载功能",
+      "api": "/v1/generate/submit",
       "mode": "horizontal"
     }
   ],
