@@ -3,9 +3,9 @@
   "title": "WireGuard组网",
   "body": [
     {
-      "type": "wizard",
+      "type": "from",
       "id": "u:b46881c6699b",
-      "steps": [
+      "body": [
         {
           "title": "全局配置",
           "body": [
@@ -436,7 +436,6 @@
           "mode": "normal"
         }
       ],
-      "name": "test",
       "debug": true,
       "desc": "提交后展示配置列表，提供复制及查看功能，后续提供命令生成和下载功能",
       "api": "/v1/generate/submit",
