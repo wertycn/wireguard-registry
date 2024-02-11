@@ -1,0 +1,12 @@
+[Interface]
+# Name = node1
+Address = 10.201.1.1
+ListenPort = 9980
+PrivateKey = 8O/qD0L2VdmFaEQ1slrI/tp3q66FMSs/09leTbo4zlo=
+
+
+[Peer]
+# Name = node1
+Endpoint = 10.10.1.1:9980
+PublicKey = HHdoskQDoHle+jUUEYX1ar48uam70LL5ENxixZMkj38=
+AllowedIPs = 10.201.1.1
