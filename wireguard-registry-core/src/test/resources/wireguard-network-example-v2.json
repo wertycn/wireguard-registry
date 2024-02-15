@@ -21,6 +21,7 @@
           ],
           "table": "auto",
           "mtu": 1420,
+          "keepalive": 55,
           "pre_up": [
             "echo 'Hello! WireGuard Registry'"
           ],

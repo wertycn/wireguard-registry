@@ -8,6 +8,7 @@ import icu.debug.net.wg.core.model.network.WireGuardNetworkNode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.util.ObjectUtils;
 
 /**
  * 包装网络节点配置相关信息的对象
@@ -51,6 +52,12 @@ public class NetworkNodeWrapper {
 
     public WireGuardPeer buildPeer(NetworkNodeWrapper requestWrapper) {
         EndpointType endpointType = this.getEndpointType(requestWrapper);
-        return this.getNode().toPeer(endpointType);
+        WireGuardPeer peer = this.getNode().toPeer(endpointType);
+        // 设置客户端向服务端宣告自身地址时间
+        Integer keepalive = requestWrapper.getNode().getKeepalive();
+        if (!ObjectUtils.isEmpty(keepalive) && keepalive > 0) {
+            peer.setPersistentKeepalive(keepalive);
+        }
+        return peer;
     }
 }

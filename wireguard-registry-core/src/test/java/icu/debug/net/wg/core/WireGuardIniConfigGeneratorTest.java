@@ -113,8 +113,7 @@ class WireGuardIniConfigGeneratorTest {
 
     private static WireGuardNetworkNode getNetworkNode() {
         WireGuardNetworkStruct struct = getWireGuardNetworkStruct();
-        WireGuardNetworkNode node = struct.getNetworkNodes().get(0);
-        return node;
+        return struct.getNetworkNodes().get(0);
     }
 
     @Test
@@ -192,6 +191,27 @@ class WireGuardIniConfigGeneratorTest {
 
     }
 
+    @Test
+    @DisplayName("测试指定子网地址节点配置生成")
+    void testSetSubNetGen() {
+        WireGuardNetProperties properties = getWireGuardNetProperties();
+        WireGuardNetworkStruct struct = getWireGuardNetworkStruct("wireguard-network-example-v3.json");
+        WireGuardConfigGenerator generator = new WireGuardConfigGenerator(struct, properties);
+        assertEquals("10.201.0.3", generator.buildConfig("set-sub-net").getConfig().getWgInterface().getAddress());
+        assertEquals("10.201.0.1", generator.buildConfig("sub-not-valid-net").getConfig().getWgInterface().getAddress());
+        assertEquals("10.201.0.2", generator.buildConfig("not-set-sub-net").getConfig().getWgInterface().getAddress());
+    }
+
+    @Test
+    @DisplayName("测试心跳时长配置")
+    void testKeepAliveTime() {
+        WireGuardNetProperties properties = getWireGuardNetProperties();
+        WireGuardNetworkStruct struct = getWireGuardNetworkStruct("wireguard-network-example-keepalive.json");
+        WireGuardConfigGenerator generator = new WireGuardConfigGenerator(struct, properties);
+        generator.buildConfig("set-keepalive").getConfig().getPeers().forEach(peer -> assertEquals(55, peer.getPersistentKeepalive()));
+        generator.buildConfig("not-set-keepalive").getConfig().getPeers().forEach(peer -> assertNull(peer.getPersistentKeepalive()));
+    }
+
     private static WireGuardNetProperties getWireGuardNetProperties() {
         WireGuardNetProperties properties = new WireGuardNetProperties();
         properties.setNetmask("255.255.255.0");
@@ -231,5 +251,5 @@ class WireGuardIniConfigGeneratorTest {
         Map<String, WireGuardIniConfig> stringWireGuardIniConfigMap = generator.buildWireGuardIniConfigMap();
         assertNull(stringWireGuardIniConfigMap.get("group-tcloud-a-01").getWgInterface().getPrivateKey());
     }
-    
+
 }

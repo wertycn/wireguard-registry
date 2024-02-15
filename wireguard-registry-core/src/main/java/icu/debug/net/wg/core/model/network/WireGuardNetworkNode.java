@@ -111,9 +111,7 @@ public class WireGuardNetworkNode {
         if (!ObjectUtils.isEmpty(address)) {
             peer.setAllowedIPs(List.of(address));
         }
-        if (!ObjectUtils.isEmpty(keepalive) && keepalive != 0) {
-            peer.setPersistentKeepalive(keepalive);
-        }
+
         return peer;
     }
 }

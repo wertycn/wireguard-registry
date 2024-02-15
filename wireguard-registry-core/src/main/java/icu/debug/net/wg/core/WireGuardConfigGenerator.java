@@ -52,7 +52,7 @@ public class WireGuardConfigGenerator {
             return;
         }
         // 子网分配
-        handlerSubNetallecte(node);
+        handlerSubNetAllocate(node);
 
         // 处理密钥分配
         handlerKeyAllecte(node);
@@ -61,12 +61,24 @@ public class WireGuardConfigGenerator {
         handlerDefaultBaseProp(node);
     }
 
-    private void handlerSubNetallecte(WireGuardNetworkNode node) {
-        if (!StringUtils.hasLength(node.getAddress()) || netAddressAllocator.isInSubnet(node.getAddress())) {
-            netAddressAllocator.allocateIP().ifPresentOrElse(node::setAddress, () -> {
-                throw new IllegalArgumentException("WireGuard Struct node address is empty , and can not allocate address");
-            });
+    private void handlerSubNetAllocate(WireGuardNetworkNode node) {
+        if (!StringUtils.hasLength(node.getAddress())) {
+            log.debug("node [hostname={}] not set sub net address , auto allocate sub net address", node.getServerNode().getHostname());
+            allocateSubNetAddress(node);
+            return;
         }
+        if (!netAddressAllocator.isInSubnet(node.getAddress())) {
+            log.warn("node [hostname={}] custom net address not valid , auto allocate new sub net address", node.getServerNode().getHostname());
+            allocateSubNetAddress(node);
+            return;
+        }
+        log.debug("node [hostname={}] use custom net address {}", node.getServerNode().getHostname(), node.getAddress());
+    }
+
+    private void allocateSubNetAddress(WireGuardNetworkNode node) {
+        netAddressAllocator.allocateIP().ifPresentOrElse(node::setAddress, () -> {
+            throw new IllegalArgumentException("WireGuard Struct node address is empty , and can not allocate address");
+        });
     }
 
     private void handlerDefaultBaseProp(WireGuardNetworkNode node) {

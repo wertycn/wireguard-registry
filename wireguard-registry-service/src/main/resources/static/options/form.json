@@ -211,6 +211,7 @@
                   "name": "network_nodes",
                   "label": "网络节点配置",
                   "multiLine": true,
+                  "removable": true,
                   "items": [
                     {
                       "type": "combo",
@@ -271,7 +272,7 @@
                             },
                             {
                               "type": "input-number",
-                              "name": "keeplive",
+                              "name": "keepalive",
                               "label": "心跳周期(s)",
                               "desc": "大于0时生效，用于内网主机主动向其他网络宣告",
                               "id": "u:a66a1abf37c9"
@@ -390,7 +391,6 @@
                   "strictMode": true,
                   "syncFields": [],
                   "addable": true,
-                  "removable": false,
                   "draggable": false,
                   "flat": false,
                   "multiple": true,
@@ -415,10 +415,10 @@
                 "size": "sm",
                 "id": "u:d55537137a98"
               },
+              "removable": true,
               "addable": true,
               "placeholder": "",
               "removableMode": "icon",
-              "removable": false,
               "desc": "一般情况同一局域网内的节点为一组，组内节点通过内网通信，组外节点之间通过公网通信"
             }
           ],
@@ -432,10 +432,6 @@
         "size": "full",
         "title": "操作成功",
         "body": [{
-          "type": "form",
-          "debug": true,
-          "body": []
-        },{
           "type": "table",
           "sources": "$items",
 

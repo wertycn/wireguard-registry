@@ -1,0 +1,42 @@
+{
+  "name": "WireGuard虚拟测试网络",
+  "local_area_networks": [
+    {
+      "name": "test",
+      "network_type": "OPEN_NAT",
+      "network_nodes": [
+        {
+          "server_node": {
+            "hostname": "set-keepalive",
+            "public_address": "181.1.1.1",
+            "private_address": "10.0.4.1"
+          },
+          "address": "10.201.0.3",
+          "public_key": "bVlrpsmGYeVheI5g9RPcMIjhcVkW92rKi0R2mO6X7TY=",
+          "private_key": "oKcbRtbaw+wooOQ6dxe5/5yvfjht9yc13YA/SJEXfmQ=",
+          "listen_port": 5219,
+          "dns": [
+            "8.8.8.8",
+            "1.1.1.1"
+          ],
+          "table": "auto",
+          "mtu": 1420,
+          "keepalive": 55,
+          "pre_up": [
+            "echo 'Hello! WireGuard Registry'"
+          ],
+          "post_up": [],
+          "pre_down": [],
+          "post_down": []
+        },
+        {
+          "server_node": {
+            "hostname": "not-set-keepalive",
+            "public_address": "181.1.1.2",
+            "private_address": "10.0.4.2"
+          }
+        }
+      ]
+    }
+  ]
+}
