@@ -20,23 +20,92 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: 拉取代码
-      uses: actions/checkout@v3
-    - name: 创建JDK 17环境
-      uses: actions/setup-java@v1
-      with:
-        java-version: '17'
-      # Runs a single command using the runners shell
-    - name: Maven缓存配置
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
-    - name: 单元测试
-      run: mvn org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report | grep -v "Download" | grep -v Progress
-    - name: 代码扫描
-      run: SONAR_TOKEN=${{ secrets.SONAR_CLOUD_TOKEN }} sh sonar.sh | grep -v "Download" | grep -v Progress
-    # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
-    - name: 更新依赖图
-      uses: advanced-security/maven-dependency-submission-action@v3
+      - name: 部署完成通知
+        uses: wertycn/work-wechat-send-action@main
+        with:
+          wechat_id: ${{ secrets.WECHAT_CORP_ID }} # 企业微信id
+          agent_secret: ${{ secrets.WECHAT_CROP_SECRET }} # 应用密钥
+          agent_id: ${{ secrets.WECHAT_AGENT_ID }} #应用id
+          to_user: '@all' # 消息接收人，多个使用竖线|分割,默认为空发送给所有人
+          msgtype: text
+          send_step: post # 消息发送时机 main 正常流程  post action 执行完成后发送
+          content: "自动构建结束通知\n\n
+          执行结果: ${{ job.status }}\n
+          项目名称: ${{ github.repository }}\n
+          构建分支: ${{ github.ref_name }}\n
+          触发事件: ${{ github.event_name }}\n
+          触发用户: ${{ github.actor }} \n
+          项目地址: <a href='https://wireguard.debug.icu'>WireGuard组网生成器</a>\n
+          "
+      - name: 构建开始通知
+        uses: wertycn/work-wechat-send-action@main
+        with:
+          wechat_id: ${{ secrets.WECHAT_CORP_ID }} # 企业微信id
+          agent_secret: ${{ secrets.WECHAT_CROP_SECRET }} # 应用密钥
+          agent_id: ${{ secrets.WECHAT_AGENT_ID }} #应用id
+          to_user: '@all' # 消息接收人，多个使用竖线|分割,默认为空发送给所有人
+          msgtype: text
+          send_step: main # 消息发送时机 main 正常流程  post action 执行完成后发送
+          content: "自动构建开始通知\n\n
+            项目名称: ${{ github.repository }}\n
+            构建分支: ${{ github.ref_name }}\n
+            触发事件: ${{ github.event_name }}\n
+            触发用户: ${{ github.actor }} \n
+            项目地址: <a href='https://wireguard.debug.icu'>WireGuard组网生成器</a>\n
+            "
+      - name: 拉取代码
+        uses: actions/checkout@v3
+      - name: 创建JDK 17环境
+        uses: actions/setup-java@v1
+        with:
+          java-version: '17'
+        # Runs a single command using the runners shell
+      - name: Maven缓存配置
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: 单元测试
+        run: mvn org.jacoco:jacoco-maven-plugin:0.8.10:prepare-agent test org.jacoco:jacoco-maven-plugin:0.8.10:report | grep -v "Download" | grep -v Progress
+      - name: 代码扫描
+        run: SONAR_TOKEN=${{ secrets.SONAR_CLOUD_TOKEN }} sh sonar.sh | grep -v "Download" | grep -v Progress
+      - name: Maven编译
+        run: |
+          mvn --batch-mode --update-snapshots verify
+          mkdir -p deploy
+          cp wireguard-registry-service/target/wireguard-registry-service*.jar deploy/app.jar
+          ls deploy/
+          version_date=`date "+%Y%m%d"`
+      - name: 登录私有Docker仓库
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.DOCKER_HUB_REGISTRY_HW_HK  }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME_HW }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD_HW }}
+
+
+
+      - name: Docker镜像编译及推送
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_HUB_DOMAIN_HW_HK }}/debug-app/wireguard-registry:${{ github.sha }}
+            ${{ secrets.DOCKER_HUB_DOMAIN_HW_HK }}/debug-app/wireguard-registry:latest
+
+      - name: 等待镜像推送成功
+        run: sleep 15
+
+      - name: deploy to k8s by kuboard
+        uses: wertycn/kuboard-deploy-action@main
+        with:
+          user: "${{ secrets.DEPLOY_USER }}"             # 'kuboard user name'
+          access_key: "${{ secrets.DEPLOY_ACCESS_KEY }}"       # 'kuboard access key'
+          deploy_namespace: "debug-app" # 'deploy cluster namespace'
+          server_name: "data-chart-ai"      # 'deploy server name'
+          docker_image: "${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }}/debug-app/data-chart-ai:${{ github.sha }}"     # 'deploy server docker image'
+          deploy_api_url: "${{ secrets.DEPLOY_API_URL }}"   # 'kuboard deploy (ci/cd) api url,eg http://YOUR_DOMAIN/kuboard-api/cluster/YOUR_CLUSTER_NAME/kind/CICDApi/YOUR_KUBOARD_NAME/resource/updateImageTag'
+          deploy_kind: "deployments"      # 'deploy pod kind,default value deployments (deployments,statefulsets,daemonsets,cronjobs,jobs)'
