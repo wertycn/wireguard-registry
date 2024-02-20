@@ -108,4 +108,4 @@ jobs:
           server_name: "data-chart-ai"      # 'deploy server name'
           docker_image: "${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }}/debug-app/data-chart-ai:${{ github.sha }}"     # 'deploy server docker image'
           deploy_api_url: "${{ secrets.DEPLOY_API_URL }}"   # 'kuboard deploy (ci/cd) api url,eg http://YOUR_DOMAIN/kuboard-api/cluster/YOUR_CLUSTER_NAME/kind/CICDApi/YOUR_KUBOARD_NAME/resource/updateImageTag'
-          deploy_kind: "deployments"      # 'deploy pod kind,default value deployments (deployments,statefulsets,daemonsets,cronjobs,jobs)'
+          deploy_kind: "deployments"
