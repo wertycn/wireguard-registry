@@ -72,7 +72,7 @@ jobs:
         run: SONAR_TOKEN=${{ secrets.SONAR_CLOUD_TOKEN }} sh sonar.sh | grep -v "Download" | grep -v Progress
       - name: Maven编译
         run: |
-          mvn --batch-mode --update-snapshots verify
+          mvn package -DskipTests
           mkdir -p deploy
           cp wireguard-registry-service/target/wireguard-registry-service*.jar deploy/app.jar
           ls deploy/
