@@ -105,7 +105,7 @@ jobs:
       - name: 等待镜像推送成功
         run: sleep 5
 
-      - name: deploy to k8s by kuboard
+      - name: 部署至k8s
         uses: wertycn/kuboard-deploy-action@main
         with:
           user: "${{ secrets.DEPLOY_USER }}"             # 'kuboard user name'

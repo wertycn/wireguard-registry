@@ -1,6 +1,6 @@
 {
   "type": "page",
-  "title": "WireGuard组网",
+  "title": "WireGuard 跨云组网配置生成",
   "body": [
     {
       "type": "form",
