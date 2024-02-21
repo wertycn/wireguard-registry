@@ -6,7 +6,7 @@
     <modules>
         <module>wireguard-registry-core</module>
         <module>wireguard-registry-service</module>
-<!--        <module>wireguard-registry-client</module>-->
+        <module>wireguard-registry-client</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
