@@ -1,11 +1,12 @@
 {
   "type": "page",
-  "title": "WireGuard 跨云组网配置生成",
+  "title": "",
   "body": [
     {
       "type": "form",
-      "persistData": "wireguard_cache",
       "id": "u:b46881c6699b",
+      "mode": "horizontal",
+      "persistData": "wireguard_cache",
       "body": [
         {
           "name": "properties",
@@ -153,7 +154,10 @@
               "className": "",
               "title": "高级设置"
             }
-          ]
+          ],
+          "strictMode": true,
+          "syncFields": [],
+          "mode": "normal"
         },
         {
           "label": "网络结构",
@@ -422,50 +426,66 @@
               "desc": "一般情况同一局域网内的节点为一组，组内节点通过内网通信，组外节点之间通过公网通信"
             }
           ],
-          "id": "u:18678c717e50"
+          "id": "u:18678c717e50",
+          "strictMode": true,
+          "syncFields": [],
+          "mode": "normal"
         }
       ],
       "desc": "提交后展示配置列表，提供复制及查看功能，后续提供命令生成和下载功能",
       "api": "/v1/generate/submit",
-      "mode": "horizontal",
       "feedback": {
         "size": "full",
         "title": "操作成功",
-        "body": [{
-          "type": "table",
-          "sources": "$items",
-
-          "columns": [
-            {
-              "title": "主机名",
-              "name": "hostname",
-              "copyable": true,
-              "width": 120
-            },  {
-              "type": "operation",
-              "label": "操作",
-              "width": 130,
-              "buttons": [
-                {
-                  "type": "action",
-                  "label": "预览配置",
-                  "actionType": "dialog",
-                  "dialog":                    {
+        "body": [
+          {
+            "type": "table",
+            "sources": "$items",
+            "columns": [
+              {
+                "title": "主机名",
+                "name": "hostname",
+                "copyable": true,
+                "width": 120
+              },
+              {
+                "type": "operation",
+                "label": "操作",
+                "width": 130,
+                "buttons": [
+                  {
+                    "type": "action",
+                    "label": "预览配置",
+                    "actionType": "dialog",
+                    "dialog": {
                       "title": "${hostname} 配置预览",
                       "body": "${REPLACE(config,'\n','<br />')}"
                     }
-
-                },
-                {
-                "type": "action",
-                "label": "复制内容",
-                "actionType": "copy",
-                "content": "${config}"
-              }]
-            }
-          ]
-        }]
-      }
+                  },
+                  {
+                    "type": "action",
+                    "label": "复制内容",
+                    "actionType": "copy",
+                    "content": "${config}"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "submit",
+          "label": "提交",
+          "primary": true,
+          "id": "u:5b4024989ef5"
+        }
+      ],
+      "feat": "Insert",
+      "dsType": "api",
+      "autoFocus": true,
+      "title": "WireGuard跨云组网配置生成"
     }
   ],
   "id": "u:bd1b3458a0bb"
