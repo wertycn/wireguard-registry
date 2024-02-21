@@ -1,8 +1,6 @@
 package icu.debug.net.wg.service.entity;
 
 import icu.debug.net.wg.core.NetworkNodeConfigWrapper;
-import icu.debug.net.wg.core.model.config.WireGuardNetProperties;
-import icu.debug.net.wg.core.model.network.WireGuardNetworkStruct;
 import lombok.*;
 
 /**

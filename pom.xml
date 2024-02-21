@@ -6,7 +6,7 @@
     <modules>
         <module>wireguard-registry-core</module>
         <module>wireguard-registry-service</module>
-        <module>wireguard-registry-client</module>
+<!--        <module>wireguard-registry-client</module>-->
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -96,5 +96,16 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>
