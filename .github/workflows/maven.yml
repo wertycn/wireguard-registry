@@ -72,7 +72,7 @@ jobs:
         run: SONAR_TOKEN=${{ secrets.SONAR_CLOUD_TOKEN }} sh sonar.sh | grep -v "Download" | grep -v Progress
       - name: Maven编译
         run: |
-          mvn package -DskipTests
+          mvn package -DskipTests  | grep -v "Download" | grep -v Progress
           mkdir -p deploy
           cp wireguard-registry-service/target/wireguard-registry-service*.jar deploy/app.jar
           ls deploy/
@@ -98,8 +98,8 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            ${{ secrets.DOCKER_HUB_DOMAIN_HW_HK }}/debug-app/wireguard-registry:${{ github.sha }}
-            ${{ secrets.DOCKER_HUB_DOMAIN_HW_HK }}/debug-app/wireguard-registry:latest
+            ${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }}/debug-app/wireguard-registry:${{ github.sha }}
+            ${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }}/debug-app/wireguard-registry:latest
             debugicu/wireguard-registry:latest
 
 #      - name: 等待镜像推送成功
