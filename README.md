@@ -25,9 +25,9 @@ docker run --name  -d -p 8080:8080 debugicu/wireguard-registry:latest
 [-] 静态网络模型  
 [-] 静态网络模型转配置模型  
 [-] 默认配置合并，属性补充 
-[-] API server
+[-] API server  
     - 提供在线配置生成服务
-    参数校验  
+    - 参数校验  
 
 后续计划继续开发功能：    
 [] 注册中心模式, 中心统一下发配置，节点变动时无需手动调整每个节点的配置
