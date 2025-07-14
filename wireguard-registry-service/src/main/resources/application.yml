@@ -1,0 +1,133 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: wireguard-registry-service
+  
+  profiles:
+    active: memory
+  
+  # Jackson配置
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_null
+    time-zone: GMT+8
+
+# WireGuard注册中心配置
+wireguard:
+  registry:
+    mode: standalone # 支持: standalone(单机模式), cluster(集群模式)
+    node-id: ""      # 集群模式下的节点ID，空则自动生成
+    heartbeat:
+      timeout: 30 # 心跳超时时间（秒）
+      interval: 10 # 心跳间隔（秒）
+    auth:
+      jwt-secret: "wireguard-registry-jwt-secret-key-change-in-production-this-is-a-very-long-secret-key-for-hs512-algorithm-requirement"
+      temp-key-expiry: 300  # 临时密钥有效期（秒）
+      signature-expiry: 60  # 签名有效期（秒）
+    admin:
+      default-username: admin
+      default-password: admin123
+
+# 日志配置
+logging:
+  level:
+    icu.debug.net.wg: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# 内存存储配置（适用于单机模式）
+spring:
+  config:
+    activate:
+      on-profile: memory
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:wireguard_registry;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+
+wireguard:
+  registry:
+    mode: standalone # 使用内存数据库时建议设置为单机模式
+
+---
+# MySQL存储配置（适用于集群模式）
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wireguard_registry?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+wireguard:
+  registry:
+    mode: cluster # 使用MySQL时建议设置为集群模式
+
+---
+# MongoDB存储配置（适用于集群模式）
+spring:
+  config:
+    activate:
+      on-profile: mongodb
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: wireguard_registry
+      authentication-database: admin
+      username: admin
+      password: password
+
+wireguard:
+  registry:
+    mode: cluster # 使用MongoDB时建议设置为集群模式
+
+---
+# SQLite存储配置（适用于单机模式）
+spring:
+  config:
+    activate:
+      on-profile: sqlite
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:wireguard_registry.db
+  jpa:
+    database-platform: org.hibernate.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+wireguard:
+  registry:
+    mode: standalone # 使用SQLite时建议设置为单机模式
