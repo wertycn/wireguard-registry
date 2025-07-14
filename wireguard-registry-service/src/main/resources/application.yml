@@ -18,8 +18,7 @@ spring:
 wireguard:
   registry:
     mode: standalone # 支持: standalone(单机模式), cluster(集群模式)
-    storage:
-      type: memory # 支持: memory, mysql, mongodb, sqlite
+    node-id: ""      # 集群模式下的节点ID，空则自动生成
     heartbeat:
       timeout: 30 # 心跳超时时间（秒）
       interval: 10 # 心跳间隔（秒）
@@ -30,10 +29,6 @@ wireguard:
     admin:
       default-username: admin
       default-password: admin123
-    cluster:
-      node-id: "node-1" # 集群模式下的节点ID
-      discovery:
-        type: database # 集群发现方式: database, consul, eureka
 
 # 日志配置
 logging:
@@ -44,7 +39,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 ---
-# MySQL存储配置
+# MySQL存储配置（适用于集群模式）
 spring:
   profiles: mysql
   datasource:
@@ -63,11 +58,10 @@ spring:
 
 wireguard:
   registry:
-    storage:
-      type: mysql
+    mode: cluster # 使用MySQL时建议设置为集群模式
 
 ---
-# MongoDB存储配置
+# MongoDB存储配置（适用于集群模式）
 spring:
   profiles: mongodb
   data:
@@ -81,11 +75,10 @@ spring:
 
 wireguard:
   registry:
-    storage:
-      type: mongodb
+    mode: cluster # 使用MongoDB时建议设置为集群模式
 
 ---
-# SQLite存储配置
+# SQLite存储配置（适用于单机模式）
 spring:
   profiles: sqlite
   datasource:
@@ -99,5 +92,4 @@ spring:
 
 wireguard:
   registry:
-    storage:
-      type: sqlite
+    mode: standalone # 使用SQLite时建议设置为单机模式
