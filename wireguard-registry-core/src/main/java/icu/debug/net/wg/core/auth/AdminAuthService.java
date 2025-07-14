@@ -1,5 +1,6 @@
 package icu.debug.net.wg.core.auth;
 
+import icu.debug.net.wg.core.auth.storage.AuthStorage;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.security.Key;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 管理控制台认证服务
@@ -22,15 +22,15 @@ public class AdminAuthService {
 
     private final Key jwtSecretKey;
     private final PasswordEncoder passwordEncoder;
-    private final Map<String, AdminUser> users = new ConcurrentHashMap<>();
-    private final Set<String> revokedTokens = new ConcurrentHashMap<String, Boolean>().keySet();
+    private final AuthStorage authStorage;
 
     // JWT 有效期（秒）
     private static final long JWT_EXPIRATION = 3600; // 1小时
 
-    public AdminAuthService(String jwtSecret) {
+    public AdminAuthService(String jwtSecret, AuthStorage authStorage) {
         this.jwtSecretKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
         this.passwordEncoder = new BCryptPasswordEncoder();
+        this.authStorage = authStorage;
         
         // 初始化默认管理员用户
         initializeDefaultAdmin();
@@ -40,28 +40,33 @@ public class AdminAuthService {
      * 初始化默认管理员用户
      */
     private void initializeDefaultAdmin() {
-        AdminUser admin = new AdminUser(
-            "admin",
-            passwordEncoder.encode("admin123"),
-            "admin@wireguard.local",
-            Set.of(AdminRole.SUPER_ADMIN),
-            true,
-            Instant.now(),
-            Instant.now()
-        );
-        users.put("admin", admin);
-        log.info("Default admin user created: admin/admin123");
+        // 检查是否已存在默认管理员
+        if (!authStorage.getAdminUser("admin").isPresent()) {
+            AdminUser admin = new AdminUser(
+                "admin",
+                passwordEncoder.encode("admin123"),
+                "admin@wireguard.local",
+                Set.of(AdminRole.SUPER_ADMIN),
+                true,
+                Instant.now(),
+                Instant.now()
+            );
+            authStorage.saveAdminUser(admin);
+            log.info("Default admin user created: admin/admin123");
+        }
     }
 
     /**
      * 用户登录
      */
     public LoginResult login(String username, String password) {
-        AdminUser user = users.get(username);
-        if (user == null) {
+        Optional<AdminUser> userOpt = authStorage.getAdminUser(username);
+        if (!userOpt.isPresent()) {
             log.warn("Login failed: user {} not found", username);
             return new LoginResult(false, "用户不存在", null, null);
         }
+        
+        AdminUser user = userOpt.get();
 
         if (!user.isActive()) {
             log.warn("Login failed: user {} is disabled", username);
@@ -78,6 +83,7 @@ public class AdminAuthService {
         
         // 更新最后登录时间
         user.setLastLoginAt(Instant.now());
+        authStorage.updateAdminUser(user);
         
         log.info("User {} logged in successfully", username);
         return new LoginResult(true, "登录成功", token, user);
@@ -89,7 +95,7 @@ public class AdminAuthService {
     public TokenValidationResult validateToken(String token) {
         try {
             // 检查是否在撤销列表中
-            if (revokedTokens.contains(token)) {
+            if (authStorage.isTokenRevoked(token)) {
                 return new TokenValidationResult(false, "Token已被撤销", null, null);
             }
 
@@ -100,11 +106,13 @@ public class AdminAuthService {
                     .getBody();
 
             String username = claims.getSubject();
-            AdminUser user = users.get(username);
+            Optional<AdminUser> userOpt = authStorage.getAdminUser(username);
             
-            if (user == null || !user.isActive()) {
+            if (!userOpt.isPresent() || !userOpt.get().isActive()) {
                 return new TokenValidationResult(false, "用户不存在或已被禁用", null, null);
             }
+            
+            AdminUser user = userOpt.get();
 
             return new TokenValidationResult(true, "Token有效", user, claims);
 
@@ -118,7 +126,7 @@ public class AdminAuthService {
      * 撤销Token
      */
     public void revokeToken(String token) {
-        revokedTokens.add(token);
+        authStorage.revokeToken(token);
         log.info("Token revoked");
     }
 
@@ -134,11 +142,12 @@ public class AdminAuthService {
      * 检查用户权限
      */
     public boolean hasPermission(String username, AdminRole requiredRole) {
-        AdminUser user = users.get(username);
-        if (user == null || !user.isActive()) {
+        Optional<AdminUser> userOpt = authStorage.getAdminUser(username);
+        if (!userOpt.isPresent() || !userOpt.get().isActive()) {
             return false;
         }
         
+        AdminUser user = userOpt.get();
         return user.getRoles().contains(requiredRole) || 
                user.getRoles().contains(AdminRole.SUPER_ADMIN);
     }
@@ -147,7 +156,7 @@ public class AdminAuthService {
      * 创建用户
      */
     public boolean createUser(String username, String password, String email, Set<AdminRole> roles) {
-        if (users.containsKey(username)) {
+        if (authStorage.getAdminUser(username).isPresent()) {
             log.warn("User {} already exists", username);
             return false;
         }
@@ -162,7 +171,7 @@ public class AdminAuthService {
             Instant.now()
         );
         
-        users.put(username, user);
+        authStorage.saveAdminUser(user);
         log.info("User {} created successfully", username);
         return true;
     }
@@ -171,11 +180,12 @@ public class AdminAuthService {
      * 更新用户密码
      */
     public boolean updatePassword(String username, String oldPassword, String newPassword) {
-        AdminUser user = users.get(username);
-        if (user == null) {
+        Optional<AdminUser> userOpt = authStorage.getAdminUser(username);
+        if (!userOpt.isPresent()) {
             return false;
         }
-
+        
+        AdminUser user = userOpt.get();
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             log.warn("Password update failed: invalid old password for user {}", username);
             return false;
@@ -183,6 +193,7 @@ public class AdminAuthService {
 
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         user.setUpdatedAt(Instant.now());
+        authStorage.updateAdminUser(user);
         
         log.info("Password updated for user {}", username);
         return true;
@@ -192,13 +203,15 @@ public class AdminAuthService {
      * 禁用/启用用户
      */
     public boolean setUserActive(String username, boolean active) {
-        AdminUser user = users.get(username);
-        if (user == null) {
+        Optional<AdminUser> userOpt = authStorage.getAdminUser(username);
+        if (!userOpt.isPresent()) {
             return false;
         }
-
+        
+        AdminUser user = userOpt.get();
         user.setActive(active);
         user.setUpdatedAt(Instant.now());
+        authStorage.updateAdminUser(user);
         
         log.info("User {} {}", username, active ? "activated" : "deactivated");
         return true;
@@ -208,14 +221,14 @@ public class AdminAuthService {
      * 获取所有用户
      */
     public List<AdminUser> getAllUsers() {
-        return new ArrayList<>(users.values());
+        return authStorage.getAllAdminUsers();
     }
 
     /**
      * 获取用户信息
      */
     public AdminUser getUser(String username) {
-        return users.get(username);
+        return authStorage.getAdminUser(username).orElse(null);
     }
 
     /**

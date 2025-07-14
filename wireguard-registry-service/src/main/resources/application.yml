@@ -17,6 +17,7 @@ spring:
 # WireGuard注册中心配置
 wireguard:
   registry:
+    mode: standalone # 支持: standalone(单机模式), cluster(集群模式)
     storage:
       type: memory # 支持: memory, mysql, mongodb, sqlite
     heartbeat:
@@ -29,6 +30,10 @@ wireguard:
     admin:
       default-username: admin
       default-password: admin123
+    cluster:
+      node-id: "node-1" # 集群模式下的节点ID
+      discovery:
+        type: database # 集群发现方式: database, consul, eureka
 
 # 日志配置
 logging:

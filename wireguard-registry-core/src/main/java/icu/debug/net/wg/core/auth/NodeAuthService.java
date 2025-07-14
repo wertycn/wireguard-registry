@@ -1,5 +1,6 @@
 package icu.debug.net.wg.core.auth;
 
+import icu.debug.net.wg.core.auth.storage.AuthStorage;
 import icu.debug.net.wg.core.helper.WireGuardGenKeyHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.whispersystems.curve25519.Curve25519;
@@ -10,7 +11,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Optional;
 
 /**
  * 节点认证服务
@@ -20,8 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NodeAuthService {
 
     private final Curve25519 curve25519;
-    private final ConcurrentHashMap<String, String> nodePublicKeys = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, TemporaryKey> temporaryKeys = new ConcurrentHashMap<>();
+    private final AuthStorage authStorage;
     private final SecureRandom secureRandom = new SecureRandom();
     
     // 临时密钥有效期（秒）
@@ -30,8 +30,9 @@ public class NodeAuthService {
     // 请求签名有效期（秒）
     private static final long SIGNATURE_EXPIRY = 60; // 1分钟
     
-    public NodeAuthService() {
+    public NodeAuthService(AuthStorage authStorage) {
         this.curve25519 = Curve25519.getInstance(Curve25519.BEST);
+        this.authStorage = authStorage;
     }
 
     /**
@@ -52,7 +53,7 @@ public class NodeAuthService {
             Instant.now().plusSeconds(TEMP_KEY_EXPIRY)
         );
         
-        temporaryKeys.put(tempKeyId, tempKey);
+        authStorage.saveTemporaryKey(tempKey);
         
         log.info("Generated temporary key {} for network {}", tempKeyId, networkId);
         return tempKey;
@@ -62,15 +63,16 @@ public class NodeAuthService {
      * 验证临时密钥签名
      */
     public boolean verifyTemporaryKeySignature(String tempKeyId, String signature, String message) {
-        TemporaryKey tempKey = temporaryKeys.get(tempKeyId);
-        if (tempKey == null) {
+        Optional<TemporaryKey> tempKeyOpt = authStorage.getTemporaryKey(tempKeyId);
+        if (!tempKeyOpt.isPresent()) {
             log.warn("Temporary key {} not found", tempKeyId);
             return false;
         }
         
+        TemporaryKey tempKey = tempKeyOpt.get();
         if (tempKey.getExpiresAt().isBefore(Instant.now())) {
             log.warn("Temporary key {} expired", tempKeyId);
-            temporaryKeys.remove(tempKeyId);
+            authStorage.deleteTemporaryKey(tempKeyId);
             return false;
         }
         
@@ -105,7 +107,7 @@ public class NodeAuthService {
                 throw new IllegalArgumentException("Invalid public key length");
             }
             
-            nodePublicKeys.put(nodeId, publicKey);
+            authStorage.saveNodePublicKey(nodeId, publicKey);
             log.info("Registered public key for node {}", nodeId);
             
         } catch (Exception e) {
@@ -118,11 +120,13 @@ public class NodeAuthService {
      * 验证节点签名
      */
     public boolean verifyNodeSignature(String nodeId, String signature, String message) {
-        String publicKey = nodePublicKeys.get(nodeId);
-        if (publicKey == null) {
+        Optional<String> publicKeyOpt = authStorage.getNodePublicKey(nodeId);
+        if (!publicKeyOpt.isPresent()) {
             log.warn("Public key not found for node {}", nodeId);
             return false;
         }
+        
+        String publicKey = publicKeyOpt.get();
         
         try {
             byte[] publicKeyBytes = Base64.getDecoder().decode(publicKey);
@@ -178,21 +182,21 @@ public class NodeAuthService {
      * 检查节点是否已注册
      */
     public boolean isNodeRegistered(String nodeId) {
-        return nodePublicKeys.containsKey(nodeId);
+        return authStorage.isNodeRegistered(nodeId);
     }
 
     /**
      * 获取节点公钥
      */
     public String getNodePublicKey(String nodeId) {
-        return nodePublicKeys.get(nodeId);
+        return authStorage.getNodePublicKey(nodeId).orElse(null);
     }
 
     /**
      * 移除节点公钥
      */
     public void removeNodePublicKey(String nodeId) {
-        nodePublicKeys.remove(nodeId);
+        authStorage.deleteNodePublicKey(nodeId);
         log.info("Removed public key for node {}", nodeId);
     }
 
@@ -200,14 +204,7 @@ public class NodeAuthService {
      * 清理过期的临时密钥
      */
     public void cleanupExpiredTemporaryKeys() {
-        Instant now = Instant.now();
-        temporaryKeys.entrySet().removeIf(entry -> {
-            if (entry.getValue().getExpiresAt().isBefore(now)) {
-                log.debug("Cleaned up expired temporary key {}", entry.getKey());
-                return true;
-            }
-            return false;
-        });
+        authStorage.cleanupExpiredTemporaryKeys();
     }
 
     /**

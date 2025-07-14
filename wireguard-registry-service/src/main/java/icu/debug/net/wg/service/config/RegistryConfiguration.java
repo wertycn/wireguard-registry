@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import icu.debug.net.wg.core.WireGuardConfigGenerator;
 import icu.debug.net.wg.core.auth.AdminAuthService;
 import icu.debug.net.wg.core.auth.NodeAuthService;
+import icu.debug.net.wg.core.auth.storage.AuthStorage;
+import icu.debug.net.wg.core.auth.storage.impl.MemoryAuthStorage;
 import icu.debug.net.wg.core.registry.ConfigRegistry;
 import icu.debug.net.wg.core.registry.impl.DefaultConfigRegistry;
 import icu.debug.net.wg.core.storage.ConfigStorage;
@@ -33,12 +35,21 @@ public class RegistryConfiguration {
     }
 
     /**
-     * 默认内存存储配置
+     * 默认内存存储配置（单机模式）
      */
     @Bean
-    @ConditionalOnProperty(name = "wireguard.registry.storage.type", havingValue = "memory", matchIfMissing = true)
+    @ConditionalOnProperty(name = "wireguard.registry.mode", havingValue = "standalone", matchIfMissing = true)
     public ConfigStorage memoryConfigStorage() {
         return new MemoryConfigStorage();
+    }
+    
+    /**
+     * 认证存储配置（单机模式）
+     */
+    @Bean
+    @ConditionalOnProperty(name = "wireguard.registry.mode", havingValue = "standalone", matchIfMissing = true)
+    public AuthStorage memoryAuthStorage() {
+        return new MemoryAuthStorage();
     }
 
     /**
@@ -61,15 +72,16 @@ public class RegistryConfiguration {
      * 节点认证服务
      */
     @Bean
-    public NodeAuthService nodeAuthService() {
-        return new NodeAuthService();
+    public NodeAuthService nodeAuthService(AuthStorage authStorage) {
+        return new NodeAuthService(authStorage);
     }
 
     /**
      * 管理员认证服务
      */
     @Bean
-    public AdminAuthService adminAuthService(@Value("${wireguard.registry.auth.jwt-secret}") String jwtSecret) {
-        return new AdminAuthService(jwtSecret);
+    public AdminAuthService adminAuthService(@Value("${wireguard.registry.auth.jwt-secret}") String jwtSecret,
+                                           AuthStorage authStorage) {
+        return new AdminAuthService(jwtSecret, authStorage);
     }
 }
