@@ -1,4 +1,4 @@
-package icu.debug.net.wg.service.entity;
+package icu.debug.net.wg.client.entity;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,6 @@ import lombok.ToString;
 @Setter
 @ToString
 public class HttpResult<T> {
-
 
     private Integer status;
 
@@ -51,4 +50,4 @@ public class HttpResult<T> {
         return result;
     }
 
-}
+} 

@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import icu.debug.net.wg.core.model.config.WireGuardIniConfig;
 import icu.debug.net.wg.core.model.network.WireGuardNetworkNode;
 import icu.debug.net.wg.core.registry.ConfigChangeListener;
-import icu.debug.net.wg.service.entity.HttpResult;
-import icu.debug.net.wg.service.entity.NodeRegistrationRequest;
-import icu.debug.net.wg.service.entity.NodeStatusRequest;
+import icu.debug.net.wg.client.entity.HttpResult;
+import icu.debug.net.wg.client.entity.NodeRegistrationRequest;
+import icu.debug.net.wg.client.entity.NodeStatusRequest;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class RegistryClient {
     public RegistryClient(String serverUrl) {
         this.serverUrl = serverUrl.endsWith("/") ? serverUrl.substring(0, serverUrl.length() - 1) : serverUrl;
         this.httpClient = HttpClient.newBuilder()
-                .timeout(Duration.ofSeconds(30))
+                .connectTimeout(Duration.ofSeconds(30))
                 .build();
         this.objectMapper = new ObjectMapper();
         this.scheduler = Executors.newScheduledThreadPool(2);
@@ -59,7 +59,8 @@ public class RegistryClient {
         return CompletableFuture.runAsync(() -> {
             try {
                 String url = String.format("%s/v1/registry/networks/%s/nodes", serverUrl, networkId);
-                NodeRegistrationRequest request = new NodeRegistrationRequest(node);
+                NodeRegistrationRequest request = new NodeRegistrationRequest();
+        request.setNode(node);
                 String requestBody = objectMapper.writeValueAsString(request);
                 
                 HttpRequest httpRequest = HttpRequest.newBuilder()
@@ -74,7 +75,7 @@ public class RegistryClient {
                     throw new RuntimeException("Failed to register node: " + response.body());
                 }
                 
-                log.info("Node {} registered successfully in network {}", node.getServerNode().getName(), networkId);
+                log.info("Node {} registered successfully in network {}", node.getServerNode().getHostname(), networkId);
                 
             } catch (Exception e) {
                 log.error("Failed to register node", e);
@@ -180,7 +181,8 @@ public class RegistryClient {
         return CompletableFuture.runAsync(() -> {
             try {
                 String url = String.format("%s/v1/registry/networks/%s/nodes/%s/heartbeat", serverUrl, networkId, nodeId);
-                NodeStatusRequest request = new NodeStatusRequest(true);
+                NodeStatusRequest request = new NodeStatusRequest();
+            request.setOnline(true);
                 String requestBody = objectMapper.writeValueAsString(request);
                 
                 HttpRequest httpRequest = HttpRequest.newBuilder()

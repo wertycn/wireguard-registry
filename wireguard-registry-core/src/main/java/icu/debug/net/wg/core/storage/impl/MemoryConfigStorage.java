@@ -21,7 +21,7 @@ public class MemoryConfigStorage implements ConfigStorage {
     @Override
     public void saveNetworkNode(String networkId, WireGuardNetworkNode node) {
         networkNodes.computeIfAbsent(networkId, k -> new ConcurrentHashMap<>())
-                .put(node.getServerNode().getName(), node);
+                .put(node.getServerNode().getHostname(), node);
         updateNetworkVersion(networkId);
     }
 

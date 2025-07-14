@@ -40,10 +40,10 @@ public class DefaultConfigRegistry implements ConfigRegistry {
 
     @Override
     public void registerNode(String networkId, WireGuardNetworkNode node) {
-        log.info("Registering node {} in network {}", node.getServerNode().getName(), networkId);
+        log.info("Registering node {} in network {}", node.getServerNode().getHostname(), networkId);
         
         // 获取旧配置
-        String nodeId = node.getServerNode().getName();
+        String nodeId = node.getServerNode().getHostname();
         WireGuardIniConfig oldConfig = configStorage.getGeneratedConfig(networkId, nodeId).orElse(null);
         
         // 保存节点
@@ -104,10 +104,11 @@ public class DefaultConfigRegistry implements ConfigRegistry {
             
             // 创建网络结构
             WireGuardNetworkStruct networkStruct = new WireGuardNetworkStruct();
-            networkStruct.setNodes(nodes);
+            // TODO: 需要正确设置 networkStruct 的 localAreaNetworks
             
             // 生成配置
-            Map<String, WireGuardIniConfig> configs = configGenerator.buildConfigs(networkStruct);
+            WireGuardConfigGenerator generator = new WireGuardConfigGenerator(networkStruct, null);
+            Map<String, WireGuardIniConfig> configs = generator.buildWireGuardIniConfigMap();
             
             // 保存配置
             for (Map.Entry<String, WireGuardIniConfig> entry : configs.entrySet()) {

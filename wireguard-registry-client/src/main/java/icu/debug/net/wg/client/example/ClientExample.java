@@ -21,7 +21,7 @@ public class ClientExample {
         WireGuardNetworkNode node = createSampleNode();
         
         String networkId = "test-network";
-        String nodeId = node.getServerNode().getName();
+        String nodeId = node.getServerNode().getHostname();
         
         try {
             // 注册节点
@@ -90,8 +90,8 @@ public class ClientExample {
         
         // 设置服务器节点信息
         ServerNode serverNode = new ServerNode();
-        serverNode.setName("client-node-1");
-        serverNode.setEndpoint("192.168.1.100:51820");
+        serverNode.setHostname("client-node-1");
+        serverNode.setPublicAddress("192.168.1.100");
         node.setServerNode(serverNode);
         
         // 设置WireGuard配置

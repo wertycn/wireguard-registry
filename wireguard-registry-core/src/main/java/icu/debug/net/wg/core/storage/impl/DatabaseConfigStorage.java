@@ -42,7 +42,7 @@ public class DatabaseConfigStorage implements ConfigStorage {
     public void saveNetworkNode(String networkId, WireGuardNetworkNode node) {
         try {
             String nodeData = objectMapper.writeValueAsString(node);
-            String nodeId = node.getServerNode().getName();
+            String nodeId = node.getServerNode().getHostname();
             
             Optional<NetworkNodeEntity> existing = networkNodeDao.findByNetworkIdAndNodeId(networkId, nodeId);
             if (existing.isPresent()) {

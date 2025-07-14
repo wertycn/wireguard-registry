@@ -4,13 +4,10 @@ import icu.debug.net.wg.core.auth.storage.AuthStorage;
 import icu.debug.net.wg.core.auth.storage.impl.DatabaseAuthStorage;
 import icu.debug.net.wg.core.storage.ConfigStorage;
 import icu.debug.net.wg.core.storage.impl.DatabaseConfigStorage;
-import icu.debug.net.wg.persistence.dao.GeneratedConfigDao;
-import icu.debug.net.wg.persistence.dao.NetworkNodeDao;
-import icu.debug.net.wg.persistence.dao.NetworkVersionDao;
-import icu.debug.net.wg.persistence.dao.auth.AdminUserDao;
-import icu.debug.net.wg.persistence.dao.auth.NodeSignatureDao;
-import icu.debug.net.wg.persistence.dao.auth.TemporaryKeyDao;
-import icu.debug.net.wg.persistence.dao.auth.TokenRevocationDao;
+import icu.debug.net.wg.core.storage.dao.GeneratedConfigDao;
+import icu.debug.net.wg.core.storage.dao.NetworkNodeDao;
+import icu.debug.net.wg.core.storage.dao.NetworkVersionDao;
+import icu.debug.net.wg.core.auth.storage.impl.DatabaseAuthStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -36,9 +33,10 @@ public class ClusterConfiguration {
     @Bean
     public ConfigStorage clusterConfigStorage(NetworkNodeDao networkNodeDao,
                                              GeneratedConfigDao generatedConfigDao,
-                                             NetworkVersionDao networkVersionDao) {
+                                             NetworkVersionDao networkVersionDao,
+                                             com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
         log.info("Creating database-based config storage for cluster mode");
-        return new DatabaseConfigStorage(networkNodeDao, generatedConfigDao, networkVersionDao);
+        return new DatabaseConfigStorage(networkNodeDao, generatedConfigDao, networkVersionDao, objectMapper);
     }
 
     /**
@@ -46,12 +44,10 @@ public class ClusterConfiguration {
      * 使用数据库存储确保多节点认证数据一致性
      */
     @Bean
-    public AuthStorage clusterAuthStorage(NodeSignatureDao nodeSignatureDao,
-                                         TemporaryKeyDao temporaryKeyDao,
-                                         AdminUserDao adminUserDao,
-                                         TokenRevocationDao tokenRevocationDao) {
+    public AuthStorage clusterAuthStorage(DatabaseAuthStorage.AuthStorageDao authStorageDao,
+                                         com.fasterxml.jackson.databind.ObjectMapper objectMapper) {
         log.info("Creating database-based auth storage for cluster mode");
-        return new DatabaseAuthStorage(nodeSignatureDao, temporaryKeyDao, adminUserDao, tokenRevocationDao);
+        return new DatabaseAuthStorage(authStorageDao, objectMapper);
     }
 
     /**

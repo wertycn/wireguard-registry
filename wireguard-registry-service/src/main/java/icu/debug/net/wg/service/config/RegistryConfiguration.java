@@ -83,19 +83,15 @@ public class RegistryConfiguration {
     }
 
     /**
-     * 配置生成器
+     * 配置生成器 - 不作为Bean，因为它是有状态的，需要在使用时创建
      */
-    @Bean
-    public WireGuardConfigGenerator wireGuardConfigGenerator() {
-        return new WireGuardConfigGenerator();
-    }
 
     /**
      * 配置注册中心
      */
     @Bean
-    public ConfigRegistry configRegistry(ConfigStorage configStorage, WireGuardConfigGenerator configGenerator) {
-        return new DefaultConfigRegistry(configStorage, configGenerator);
+    public ConfigRegistry configRegistry(ConfigStorage configStorage) {
+        return new DefaultConfigRegistry(configStorage, null);
     }
 
     /**

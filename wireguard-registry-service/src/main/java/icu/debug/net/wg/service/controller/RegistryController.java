@@ -32,7 +32,7 @@ public class RegistryController {
     @PostMapping("/networks/{networkId}/nodes")
     public HttpResult<Void> registerNode(@PathVariable String networkId, 
                                         @RequestBody NodeRegistrationRequest request) {
-        log.info("Registering node {} in network {}", request.getNode().getServerNode().getName(), networkId);
+        log.info("Registering node {} in network {}", request.getNode().getServerNode().getHostname(), networkId);
         configRegistry.registerNode(networkId, request.getNode());
         return HttpResult.success();
     }
