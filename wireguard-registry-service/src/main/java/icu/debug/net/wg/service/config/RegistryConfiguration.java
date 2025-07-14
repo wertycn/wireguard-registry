@@ -1,12 +1,15 @@
-THIS SHOULD BE A LINTER ERRORpackage icu.debug.net.wg.service.config;
+package icu.debug.net.wg.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import icu.debug.net.wg.core.WireGuardConfigGenerator;
+import icu.debug.net.wg.core.auth.AdminAuthService;
+import icu.debug.net.wg.core.auth.NodeAuthService;
 import icu.debug.net.wg.core.registry.ConfigRegistry;
 import icu.debug.net.wg.core.registry.impl.DefaultConfigRegistry;
 import icu.debug.net.wg.core.storage.ConfigStorage;
 import icu.debug.net.wg.core.storage.impl.MemoryConfigStorage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -52,5 +55,21 @@ public class RegistryConfiguration {
     @Bean
     public ConfigRegistry configRegistry(ConfigStorage configStorage, WireGuardConfigGenerator configGenerator) {
         return new DefaultConfigRegistry(configStorage, configGenerator);
+    }
+
+    /**
+     * 节点认证服务
+     */
+    @Bean
+    public NodeAuthService nodeAuthService() {
+        return new NodeAuthService();
+    }
+
+    /**
+     * 管理员认证服务
+     */
+    @Bean
+    public AdminAuthService adminAuthService(@Value("${wireguard.registry.auth.jwt-secret}") String jwtSecret) {
+        return new AdminAuthService(jwtSecret);
     }
 }
