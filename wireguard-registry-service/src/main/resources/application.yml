@@ -1,0 +1,91 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: wireguard-registry-service
+  
+  profiles:
+    active: memory
+  
+  # Jackson配置
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+    default-property-inclusion: non_null
+    time-zone: GMT+8
+
+# WireGuard注册中心配置
+wireguard:
+  registry:
+    storage:
+      type: memory # 支持: memory, mysql, mongodb, sqlite
+    heartbeat:
+      timeout: 30 # 心跳超时时间（秒）
+      interval: 10 # 心跳间隔（秒）
+
+# 日志配置
+logging:
+  level:
+    icu.debug.net.wg: DEBUG
+    org.springframework.web: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+---
+# MySQL存储配置
+spring:
+  profiles: mysql
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/wireguard_registry?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+wireguard:
+  registry:
+    storage:
+      type: mysql
+
+---
+# MongoDB存储配置
+spring:
+  profiles: mongodb
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: wireguard_registry
+      authentication-database: admin
+      username: admin
+      password: password
+
+wireguard:
+  registry:
+    storage:
+      type: mongodb
+
+---
+# SQLite存储配置
+spring:
+  profiles: sqlite
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:wireguard_registry.db
+  jpa:
+    database-platform: org.hibernate.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+wireguard:
+  registry:
+    storage:
+      type: sqlite
