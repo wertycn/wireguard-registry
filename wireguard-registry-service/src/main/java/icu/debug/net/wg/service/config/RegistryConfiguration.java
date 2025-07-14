@@ -1,4 +1,4 @@
-package icu.debug.net.wg.service.config;
+THIS SHOULD BE A LINTER ERRORpackage icu.debug.net.wg.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

@@ -22,6 +22,13 @@ wireguard:
     heartbeat:
       timeout: 30 # 心跳超时时间（秒）
       interval: 10 # 心跳间隔（秒）
+    auth:
+      jwt-secret: "wireguard-registry-jwt-secret-key-change-in-production"
+      temp-key-expiry: 300  # 临时密钥有效期（秒）
+      signature-expiry: 60  # 签名有效期（秒）
+    admin:
+      default-username: admin
+      default-password: admin123
 
 # 日志配置
 logging:
