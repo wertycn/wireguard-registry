@@ -46,6 +46,33 @@
     //    TODO:
     //     注册IP 相关校验函数
 
+    // 添加导航功能
+    function showNavigation() {
+        const nav = document.createElement('div');
+        nav.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 1000;
+        `;
+        nav.innerHTML = `
+            <h4 style="margin: 0 0 10px 0; color: #333;">功能导航</h4>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <a href="/admin.html" style="text-decoration: none; color: #1890ff; padding: 5px 10px; border-radius: 4px; border: 1px solid #1890ff; text-align: center; font-size: 14px;">
+                    管理控制台
+                </a>
+            </div>
+        `;
+        document.body.appendChild(nav);
+    }
+
+    // 页面加载完成后显示导航
+    window.addEventListener('load', showNavigation);
+
 </script>
 </body>
 </html>

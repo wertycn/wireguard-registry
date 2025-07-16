@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8"/>
+    <title>WireGuard服务管理平台</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.css"/>
+    <style>
+        html,
+        body,
+        .app-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .admin-header {
+            background: #001529;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            font-size: 18px;
+        }
+        
+        .admin-content {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <h1>WireGuard服务管理平台</h1>
+        <div id="user-info"></div>
+    </div>
+    <div id="root" class="app-wrapper admin-content"></div>
+    
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.min.js"></script>
+    <script type="text/javascript">
+        let myAmis;
+        
+        // 检查用户是否已登录
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            console.log('Checking auth, token:', token);
+            if (!token) {
+                console.log('No token found, redirecting to login');
+                window.location.href = '/login.html';
+                return false;
+            }
+            console.log('Token found, proceeding with admin page');
+            return true;
+        }
+        
+
+        
+        // 获取用户信息
+        function getUserInfo() {
+            const token = localStorage.getItem('admin_token');
+            console.log('Getting user info with token:', token);
+            
+            fetch('/v1/admin/profile', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                console.log('Profile response status:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Profile response data:', data);
+                if (data.status === 0) {
+                    document.getElementById('user-info').innerHTML = `
+                        <span>欢迎，${data.data.username}</span>
+                        <button onclick="logout()" style="margin-left: 10px; padding: 5px 10px; background: #ff4d4f; color: white; border: none; border-radius: 3px; cursor: pointer;">登出</button>
+                    `;
+                } else {
+                    console.error('Failed to get user info:', data);
+                    // 如果获取用户信息失败，可能是token无效，清除token并跳转到登录页面
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/login.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error getting user info:', error);
+                // 网络错误或其他错误，也清除token并跳转到登录页面
+                localStorage.removeItem('admin_token');
+                window.location.href = '/login.html';
+            });
+        }
+        
+        // 登出函数
+        function logout() {
+            if (confirm('确定要登出吗？')) {
+                fetch('/v1/admin/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+                    }
+                })
+                .then(() => {
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/login.html';
+                });
+            }
+        }
+        
+        (function () {
+            if (!checkAuth()) {
+                return;
+            }
+            
+            getUserInfo();
+            
+            myAmis = amisRequire('amis/embed');
+            
+            // 渲染管理页面
+            let page = {
+                "type": "page",
+                "body": {
+                    "type": "service",
+                    "schemaApi": "get:/options/admin.json"
+                }
+            };
+            
+            myAmis.embed("#root", page, {}, {
+                // 全局请求适配器
+                requestAdaptor: function(api) {
+                    const token = localStorage.getItem('admin_token');
+                    console.log('Global requestAdaptor called for:', api.url, 'with token:', token ? 'present' : 'missing');
+                    
+                    if (token) {
+                        api.headers = api.headers || {};
+                        api.headers.Authorization = `Bearer ${token}`;
+                        console.log('Added Authorization header:', api.headers.Authorization);
+                    }
+                    
+                    return api;
+                },
+                
+                // 全局响应适配器
+                responseAdaptor: function(api, payload, query, request, response) {
+                    console.log('Global responseAdaptor called for:', api.url, 'status:', response.status);
+                    
+                    // 处理401未授权错误
+                    if (response.status === 401) {
+                        console.log('401 error detected, clearing token and redirecting to login');
+                        localStorage.removeItem('admin_token');
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    
+                    return payload;
+                }
+            });
+        })();
+    </script>
+</body>
+</html> 

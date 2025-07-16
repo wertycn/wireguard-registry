@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8"/>
+    <title>管理页面测试</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.css"/>
+    <style>
+        body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .test-info {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>管理页面测试</h2>
+        <p>这个页面用于测试全局requestAdaptor是否正常工作</p>
+        <p>请先登录，然后查看浏览器控制台输出</p>
+    </div>
+    
+    <div id="root"></div>
+    
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.min.js"></script>
+    <script type="text/javascript">
+        let myAmis;
+        
+        // 检查用户是否已登录
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            console.log('Token check:', token ? 'present' : 'missing');
+            if (!token) {
+                alert('请先登录！');
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
+        
+        (function () {
+            if (!checkAuth()) {
+                return;
+            }
+            
+            myAmis = amisRequire('amis/embed');
+            
+            // 简单的用户列表测试页面
+            let page = {
+                "type": "page",
+                "title": "用户列表测试",
+                "body": [
+                    {
+                        "type": "crud",
+                        "api": "get:/v1/admin/users",
+                        "columns": [
+                            {
+                                "name": "username",
+                                "label": "用户名"
+                            },
+                            {
+                                "name": "email",
+                                "label": "邮箱"
+                            },
+                            {
+                                "name": "roles",
+                                "label": "角色",
+                                "type": "tags"
+                            },
+                            {
+                                "name": "active",
+                                "label": "状态",
+                                "type": "status",
+                                "map": {
+                                    "true": {
+                                        "value": "启用",
+                                        "status": "success"
+                                    },
+                                    "false": {
+                                        "value": "禁用",
+                                        "status": "fail"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                ]
+            };
+            
+            myAmis.embed("#root", page, {}, {
+                // 全局请求适配器
+                requestAdaptor: function(api) {
+                    const token = localStorage.getItem('admin_token');
+                    console.log('🔧 requestAdaptor called for:', api.url);
+                    console.log('🔧 Token:', token ? 'present' : 'missing');
+                    
+                    if (token) {
+                        api.headers = api.headers || {};
+                        api.headers.Authorization = `Bearer ${token}`;
+                        console.log('🔧 Added Authorization header');
+                    }
+                    
+                    console.log('🔧 Final API config:', api);
+                    return api;
+                },
+                
+                // 全局响应适配器
+                responseAdaptor: function(api, payload, query, request, response) {
+                    console.log('📡 responseAdaptor called for:', api.url);
+                    console.log('📡 Response status:', response.status);
+                    console.log('📡 Response payload:', payload);
+                    
+                    // 处理401未授权错误
+                    if (response.status === 401) {
+                        console.log('❌ 401 error detected, clearing token and redirecting to login');
+                        localStorage.removeItem('admin_token');
+                        window.location.href = '/login.html';
+                        return;
+                    }
+                    
+                    return payload;
+                }
+            });
+        })();
+    </script>
+</body>
+</html> 

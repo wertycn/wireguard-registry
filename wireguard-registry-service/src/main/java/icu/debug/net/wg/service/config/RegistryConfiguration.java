@@ -1,6 +1,7 @@
 package icu.debug.net.wg.service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import icu.debug.net.wg.core.WireGuardConfigGenerator;
 import icu.debug.net.wg.core.auth.AdminAuthService;
@@ -39,6 +40,7 @@ public class RegistryConfiguration {
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         return mapper;
     }
 

@@ -1,0 +1,60 @@
+{
+  "type": "page",
+  "title": "WireGuard服务管理平台",
+  "body": [
+    {
+      "type": "wrapper",
+      "className": "bg-white m:rounded b:2px solid #e4e7ed",
+      "body": [
+        {
+          "type": "container",
+          "className": "p-4",
+          "body": [
+            {
+              "type": "html",
+              "html": "<div class='text-center mb-4'><h2 class='text-2xl font-bold text-gray-800'>管理员登录</h2></div>"
+            },
+            {
+              "type": "form",
+              "api": "post:/v1/admin/login",
+              "redirect": "/admin.html",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "username",
+                  "label": "用户名",
+                  "placeholder": "请输入用户名",
+                  "required": true,
+                  "validations": {
+                    "minLength": 3,
+                    "maxLength": 20
+                  }
+                },
+                {
+                  "type": "input-password",
+                  "name": "password",
+                  "label": "密码",
+                  "placeholder": "请输入密码",
+                  "required": true,
+                  "validations": {
+                    "minLength": 6
+                  }
+                }
+              ],
+              "actions": [
+                {
+                  "type": "submit",
+                  "label": "登录",
+                  "level": "primary",
+                  "size": "lg",
+                  "className": "w-full"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "className": "min-h-screen bg-gray-100 flex items-center justify-center"
+} 

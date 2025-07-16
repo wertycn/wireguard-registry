@@ -5,14 +5,16 @@ import icu.debug.net.wg.core.auth.AdminRole;
 import icu.debug.net.wg.core.auth.AdminUser;
 import icu.debug.net.wg.core.auth.NodeAuthService;
 import icu.debug.net.wg.core.auth.TemporaryKey;
+import icu.debug.net.wg.core.registry.ConfigRegistry;
 import icu.debug.net.wg.service.entity.HttpResult;
 import icu.debug.net.wg.service.entity.LoginRequest;
 import icu.debug.net.wg.service.entity.CreateUserRequest;
 import icu.debug.net.wg.service.entity.ChangePasswordRequest;
+import icu.debug.net.wg.service.entity.CreateNetworkRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
 
@@ -26,10 +28,12 @@ public class AdminController {
 
     private final AdminAuthService adminAuthService;
     private final NodeAuthService nodeAuthService;
+    private final ConfigRegistry configRegistry;
 
-    public AdminController(AdminAuthService adminAuthService, NodeAuthService nodeAuthService) {
+    public AdminController(AdminAuthService adminAuthService, NodeAuthService nodeAuthService, ConfigRegistry configRegistry) {
         this.adminAuthService = adminAuthService;
         this.nodeAuthService = nodeAuthService;
+        this.configRegistry = configRegistry;
     }
 
     /**
@@ -187,6 +191,32 @@ public class AdminController {
 
         TemporaryKey tempKey = nodeAuthService.generateTemporaryKey(networkId);
         return HttpResult.success(tempKey);
+    }
+
+    /**
+     * 创建网络配置（需要网络管理员权限）
+     */
+    @PostMapping("/networks")
+    public HttpResult<Void> createNetwork(@RequestBody CreateNetworkRequest request,
+                                         HttpServletRequest httpRequest) {
+        AdminUser currentUser = getCurrentUser(httpRequest);
+        if (currentUser == null) {
+            return HttpResult.error("用户未登录");
+        }
+
+        if (!currentUser.hasRole(AdminRole.NETWORK_ADMIN)) {
+            return HttpResult.error("权限不足");
+        }
+
+        try {
+            // 创建网络 - 通过初始化网络版本来创建网络
+            configRegistry.createNetwork(request.getNetworkId(), request.getName(), request.getDescription());
+            log.info("Network created successfully: {}", request.getNetworkId());
+            return HttpResult.success();
+        } catch (Exception e) {
+            log.error("Failed to create network: {}", request.getNetworkId(), e);
+            return HttpResult.error("网络创建失败: " + e.getMessage());
+        }
     }
 
     /**

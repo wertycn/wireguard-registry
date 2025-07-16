@@ -2,6 +2,7 @@ package icu.debug.net.wg.core.storage.dao;
 
 import icu.debug.net.wg.core.storage.entity.NetworkVersionEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,4 +29,9 @@ public interface NetworkVersionDao {
      * 递增网络版本
      */
     void incrementVersion(String networkId);
+
+    /**
+     * 获取所有网络ID
+     */
+    List<String> findAllNetworkIds();
 }

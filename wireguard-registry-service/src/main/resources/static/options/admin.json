@@ -1,0 +1,534 @@
+{
+  "type": "page",
+  "title": "WireGuard服务管理平台",
+  "body": [
+    {
+      "type": "tabs",
+      "tabs": [
+        {
+          "title": "用户管理",
+          "body": [
+            {
+              "type": "crud",
+              "api": "get:/v1/admin/users",
+              "headerToolbar": [
+                {
+                  "type": "button",
+                  "label": "新增用户",
+                  "level": "primary",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "新增用户",
+                    "body": {
+                      "type": "form",
+                      "api": "post:/v1/admin/users",
+                      "body": [
+                        {
+                          "type": "input-text",
+                          "name": "username",
+                          "label": "用户名",
+                          "required": true,
+                          "validations": {
+                            "minLength": 3,
+                            "maxLength": 20
+                          }
+                        },
+                        {
+                          "type": "input-password",
+                          "name": "password",
+                          "label": "密码",
+                          "required": true,
+                          "validations": {
+                            "minLength": 6
+                          }
+                        },
+                        {
+                          "type": "input-email",
+                          "name": "email",
+                          "label": "邮箱",
+                          "required": true
+                        },
+                        {
+                          "type": "checkboxes",
+                          "name": "roles",
+                          "label": "角色",
+                          "required": true,
+                          "options": [
+                            {
+                              "label": "超级管理员",
+                              "value": "SUPER_ADMIN"
+                            },
+                            {
+                              "label": "网络管理员",
+                              "value": "NETWORK_ADMIN"
+                            },
+                            {
+                              "label": "节点管理员",
+                              "value": "NODE_ADMIN"
+                            },
+                            {
+                              "label": "监控员",
+                              "value": "MONITOR"
+                            },
+                            {
+                              "label": "只读用户",
+                              "value": "READ_ONLY"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                }
+              ],
+              "columns": [
+                {
+                  "name": "username",
+                  "label": "用户名",
+                  "width": 150
+                },
+                {
+                  "name": "email",
+                  "label": "邮箱",
+                  "width": 200
+                },
+                {
+                  "name": "roles",
+                  "label": "角色",
+                  "width": 200,
+                  "type": "tags"
+                },
+                {
+                  "name": "active",
+                  "label": "状态",
+                  "width": 100,
+                  "type": "status",
+                  "map": {
+                    "true": {
+                      "value": "启用",
+                      "status": "success"
+                    },
+                    "false": {
+                      "value": "禁用",
+                      "status": "fail"
+                    }
+                  }
+                },
+                {
+                  "name": "createTime",
+                  "label": "创建时间",
+                  "width": 180,
+                  "type": "datetime"
+                },
+                {
+                  "type": "operation",
+                  "label": "操作",
+                  "width": 200,
+                  "buttons": [
+                    {
+                      "type": "button",
+                      "label": "启用",
+                      "level": "primary",
+                      "size": "sm",
+                      "actionType": "ajax",
+                      "api": "post:/v1/admin/users/${username}/status?active=true",
+                      "confirmText": "确定要启用此用户吗？",
+                      "visibleOn": "this.active == false"
+                    },
+                    {
+                      "type": "button",
+                      "label": "禁用",
+                      "level": "danger",
+                      "size": "sm",
+                      "actionType": "ajax",
+                      "api": "post:/v1/admin/users/${username}/status?active=false",
+                      "confirmText": "确定要禁用此用户吗？",
+                      "visibleOn": "this.active == true"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "网络管理",
+          "body": [
+            {
+              "type": "crud",
+              "api": "get:/v1/registry/networks",
+              "headerToolbar": [
+                {
+                  "type": "button",
+                  "label": "创建网络",
+                  "level": "primary",
+                  "actionType": "dialog",
+                  "dialog": {
+                    "title": "创建新网络",
+                    "body": {
+                      "type": "form",
+                      "api": "post:/v1/admin/networks",
+                      "body": [
+                        {
+                          "type": "input-text",
+                          "name": "networkId",
+                          "label": "网络ID",
+                          "required": true,
+                          "placeholder": "例如：my-network",
+                          "validations": {
+                            "pattern": "^[a-zA-Z0-9-_]+$",
+                            "maxLength": 50
+                          },
+                          "desc": "网络的唯一标识符，只能包含字母、数字、横线和下划线"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "name",
+                          "label": "网络名称",
+                          "required": true,
+                          "placeholder": "例如：我的WireGuard网络",
+                          "validations": {
+                            "maxLength": 100
+                          }
+                        },
+                        {
+                          "type": "textarea",
+                          "name": "description",
+                          "label": "网络描述",
+                          "placeholder": "请输入网络的描述信息",
+                          "validations": {
+                            "maxLength": 500
+                          }
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "address",
+                          "label": "网络地址",
+                          "required": true,
+                          "placeholder": "例如：10.0.0.0",
+                          "desc": "网络的IP地址段"
+                        },
+                        {
+                          "type": "input-text",
+                          "name": "netmask",
+                          "label": "子网掩码",
+                          "required": true,
+                          "placeholder": "例如：255.255.255.0",
+                          "value": "255.255.255.0",
+                          "desc": "网络的子网掩码"
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "type": "button",
+                  "label": "刷新",
+                  "level": "info",
+                  "actionType": "reload"
+                }
+              ],
+              "columns": [
+                {
+                  "name": "networkId",
+                  "label": "网络ID",
+                  "width": 200,
+                  "copyable": true
+                },
+                {
+                  "name": "version",
+                  "label": "版本",
+                  "width": 100,
+                  "type": "tpl",
+                  "tpl": "${version || '获取中...'}"
+                },
+                {
+                  "name": "nodeCount",
+                  "label": "节点数量",
+                  "width": 100,
+                  "type": "tpl",
+                  "tpl": "${nodeCount || '获取中...'}"
+                },
+                {
+                  "type": "operation",
+                  "label": "操作",
+                  "width": 300,
+                  "buttons": [
+                    {
+                      "type": "button",
+                      "label": "查看节点",
+                      "level": "primary",
+                      "size": "sm",
+                      "actionType": "dialog",
+                      "dialog": {
+                        "title": "网络节点管理 - ${networkId}",
+                        "size": "xl",
+                        "body": {
+                          "type": "crud",
+                          "api": "get:/v1/registry/networks/${networkId}/nodes",
+                          "headerToolbar": [
+                            {
+                              "type": "button",
+                              "label": "刷新",
+                              "level": "primary",
+                              "actionType": "reload"
+                            }
+                          ],
+                          "columns": [
+                            {
+                              "name": "id",
+                              "label": "节点ID",
+                              "width": 150,
+                              "copyable": true
+                            },
+                            {
+                              "name": "serverNode.hostname",
+                              "label": "主机名",
+                              "width": 150
+                            },
+                            {
+                              "name": "serverNode.publicAddress",
+                              "label": "公网地址",
+                              "width": 150
+                            },
+                            {
+                              "name": "serverNode.privateAddress",
+                              "label": "私网地址",
+                              "width": 150
+                            },
+                            {
+                              "name": "online",
+                              "label": "在线状态",
+                              "width": 100,
+                              "type": "status",
+                              "map": {
+                                "true": {
+                                  "value": "在线",
+                                  "status": "success"
+                                },
+                                "false": {
+                                  "value": "离线",
+                                  "status": "fail"
+                                }
+                              }
+                            },
+                            {
+                              "type": "operation",
+                              "label": "操作",
+                              "width": 200,
+                              "buttons": [
+                                {
+                                  "type": "button",
+                                  "label": "查看配置",
+                                  "level": "primary",
+                                  "size": "sm",
+                                  "actionType": "dialog",
+                                  "dialog": {
+                                    "title": "节点配置 - ${serverNode.hostname}",
+                                    "size": "lg",
+                                    "body": {
+                                      "type": "service",
+                                      "api": "get:/v1/registry/networks/${networkId}/nodes/${id}/config",
+                                      "body": {
+                                        "type": "code",
+                                        "language": "ini",
+                                        "value": "${content}"
+                                      }
+                                    }
+                                  }
+                                },
+                                {
+                                  "type": "button",
+                                  "label": "注销节点",
+                                  "level": "danger",
+                                  "size": "sm",
+                                  "actionType": "ajax",
+                                  "api": "delete:/v1/registry/networks/${networkId}/nodes/${id}",
+                                  "confirmText": "确定要注销此节点吗？"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "重新生成配置",
+                      "level": "warning",
+                      "size": "sm",
+                      "actionType": "ajax",
+                      "api": "post:/v1/registry/networks/${networkId}/regenerate",
+                      "confirmText": "确定要重新生成此网络的配置吗？"
+                    },
+                    {
+                      "type": "button",
+                      "label": "删除网络",
+                      "level": "danger",
+                      "size": "sm",
+                      "actionType": "ajax",
+                      "api": "delete:/v1/registry/networks/${networkId}",
+                      "confirmText": "确定要删除此网络吗？此操作不可逆！"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "临时密钥管理",
+          "body": [
+            {
+              "type": "form",
+              "title": "生成临时密钥",
+              "body": [
+                {
+                  "type": "input-text",
+                  "name": "networkId",
+                  "label": "网络ID",
+                  "required": true,
+                  "desc": "请输入要生成临时密钥的网络ID"
+                }
+              ],
+              "actions": [
+                {
+                  "type": "submit",
+                  "label": "生成临时密钥",
+                  "level": "primary",
+                  "api": "post:/v1/admin/temp-keys?networkId=${networkId}",
+                  "feedback": {
+                    "title": "临时密钥生成成功",
+                    "body": [
+                      {
+                        "type": "property",
+                        "items": [
+                          {
+                            "label": "密钥ID",
+                            "content": "${keyId}",
+                            "span": 3
+                          },
+                          {
+                            "label": "密钥内容",
+                            "content": "${key}",
+                            "span": 3,
+                            "copyable": true
+                          },
+                          {
+                            "label": "过期时间",
+                            "content": "${expiresAt}",
+                            "span": 3
+                          },
+                          {
+                            "label": "网络ID",
+                            "content": "${networkId}",
+                            "span": 3
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "系统设置",
+          "body": [
+            {
+              "type": "form",
+              "title": "修改密码",
+              "api": "post:/v1/admin/password",
+              "body": [
+                {
+                  "type": "input-password",
+                  "name": "oldPassword",
+                  "label": "当前密码",
+                  "required": true
+                },
+                {
+                  "type": "input-password",
+                  "name": "newPassword",
+                  "label": "新密码",
+                  "required": true,
+                  "validations": {
+                    "minLength": 6
+                  }
+                },
+                {
+                  "type": "input-password",
+                  "name": "confirmPassword",
+                  "label": "确认新密码",
+                  "required": true,
+                  "validations": {
+                    "equalsField": "newPassword"
+                  }
+                }
+              ],
+              "actions": [
+                {
+                  "type": "submit",
+                  "label": "修改密码",
+                  "level": "primary"
+                }
+              ]
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "service",
+              "api": "get:/v1/admin/profile",
+              "body": [
+                {
+                  "type": "property",
+                  "title": "用户信息",
+                  "items": [
+                    {
+                      "label": "用户名",
+                      "content": "${username}",
+                      "span": 2
+                    },
+                    {
+                      "label": "邮箱",
+                      "content": "${email}",
+                      "span": 2
+                    },
+                    {
+                      "label": "角色",
+                      "content": "${roles}",
+                      "span": 2
+                    },
+                    {
+                      "label": "状态",
+                      "content": "${active ? '启用' : '禁用'}",
+                      "span": 2
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "aside": {
+    "type": "nav",
+    "stacked": true,
+    "className": "w-xs",
+    "itemActions": [
+      {
+        "type": "button",
+        "label": "登出",
+        "level": "danger",
+        "size": "sm",
+        "actionType": "ajax",
+        "api": "post:/v1/admin/logout",
+        "confirmText": "确定要登出吗？",
+        "reload": "window"
+      }
+    ]
+  }
+} 

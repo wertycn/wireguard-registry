@@ -15,6 +15,10 @@ import java.util.List;
 @ToString
 public class WireGuardNetProperties {
 
+    /**
+     * 配置名称
+     */
+    private String name;
 
     /**
      * 子网地址

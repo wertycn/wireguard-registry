@@ -72,7 +72,11 @@ public class MemoryConfigStorage implements ConfigStorage {
 
     @Override
     public List<String> getAllNetworkIds() {
-        return new ArrayList<>(networkNodes.keySet());
+        // 合并有节点的网络和只有版本记录的网络
+        Set<String> allNetworkIds = new HashSet<>();
+        allNetworkIds.addAll(networkNodes.keySet());
+        allNetworkIds.addAll(networkVersions.keySet());
+        return new ArrayList<>(allNetworkIds);
     }
 
     @Override
@@ -84,7 +88,8 @@ public class MemoryConfigStorage implements ConfigStorage {
 
     @Override
     public boolean networkExists(String networkId) {
-        return networkNodes.containsKey(networkId);
+        // 检查是否有节点记录或版本记录
+        return networkNodes.containsKey(networkId) || networkVersions.containsKey(networkId);
     }
 
     @Override

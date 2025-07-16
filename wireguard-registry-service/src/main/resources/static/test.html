@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>登录测试</title>
+</head>
+<body>
+    <h1>API测试</h1>
+    <div id="result"></div>
+    <script>
+        let token = '';
+        
+        // 测试登录功能
+        function testLogin() {
+            return fetch('/v1/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'admin',
+                    password: 'admin123'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultHTML = '<h3>登录测试</h3>';
+                resultHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // 检查是否包含密码哈希
+                if (data.data && data.data.user && data.data.user.passwordHash) {
+                    resultHTML += '<p style="color: red;">❌ 错误：响应中包含密码哈希！</p>';
+                } else {
+                    resultHTML += '<p style="color: green;">✅ 正确：响应中不包含密码哈希</p>';
+                }
+                
+                if (data.status === 0 && data.data && data.data.token) {
+                    token = data.data.token;
+                    resultHTML += '<p style="color: green;">✅ 登录成功，获取到token</p>';
+                } else {
+                    resultHTML += '<p style="color: red;">❌ 登录失败</p>';
+                }
+                
+                document.getElementById('result').innerHTML = resultHTML;
+                return data;
+            })
+            .catch(error => {
+                document.getElementById('result').innerHTML = '<p style="color: red;">登录错误：' + error.message + '</p>';
+                throw error;
+            });
+        }
+        
+        // 测试用户信息接口
+        function testProfile() {
+            return fetch('/v1/admin/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultHTML = document.getElementById('result').innerHTML;
+                resultHTML += '<h3>用户信息测试</h3>';
+                resultHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.status === 0) {
+                    resultHTML += '<p style="color: green;">✅ 获取用户信息成功</p>';
+                } else {
+                    resultHTML += '<p style="color: red;">❌ 获取用户信息失败</p>';
+                }
+                
+                document.getElementById('result').innerHTML = resultHTML;
+                return data;
+            })
+            .catch(error => {
+                let resultHTML = document.getElementById('result').innerHTML;
+                resultHTML += '<p style="color: red;">用户信息错误：' + error.message + '</p>';
+                document.getElementById('result').innerHTML = resultHTML;
+                throw error;
+            });
+        }
+        
+        // 测试用户列表接口
+        function testUsers() {
+            return fetch('/v1/admin/users', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultHTML = document.getElementById('result').innerHTML;
+                resultHTML += '<h3>用户列表测试</h3>';
+                resultHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.status === 0) {
+                    resultHTML += '<p style="color: green;">✅ 获取用户列表成功</p>';
+                } else {
+                    resultHTML += '<p style="color: red;">❌ 获取用户列表失败</p>';
+                }
+                
+                document.getElementById('result').innerHTML = resultHTML;
+                return data;
+            })
+            .catch(error => {
+                let resultHTML = document.getElementById('result').innerHTML;
+                resultHTML += '<p style="color: red;">用户列表错误：' + error.message + '</p>';
+                document.getElementById('result').innerHTML = resultHTML;
+                throw error;
+            });
+        }
+        
+        // 页面加载时自动测试
+        window.onload = function() {
+            testLogin()
+                .then(() => testProfile())
+                .then(() => testUsers())
+                .catch(error => {
+                    console.error('测试失败:', error);
+                });
+        };
+    </script>
+</body>
+</html> 
