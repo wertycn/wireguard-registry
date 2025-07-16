@@ -13,6 +13,11 @@ import java.util.Map;
 public interface ConfigRegistry {
 
     /**
+     * 创建网络
+     */
+    void createNetwork(String networkId, String name, String description);
+
+    /**
      * 注册网络节点
      */
     void registerNode(String networkId, WireGuardNetworkNode node);

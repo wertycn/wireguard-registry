@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>登录调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .info {
+            color: blue;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>登录和认证调试</h1>
+    
+    <div class="test-section">
+        <h2>当前状态检查</h2>
+        <div id="status-check"></div>
+        <button class="btn-primary" onclick="checkCurrentStatus()">检查当前状态</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>登录测试</h2>
+        <div id="login-test"></div>
+        <button class="btn-primary" onclick="testLogin()">测试登录</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Token验证测试</h2>
+        <div id="token-test"></div>
+        <button class="btn-primary" onclick="testToken()">测试当前Token</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>用户信息测试</h2>
+        <div id="profile-test"></div>
+        <button class="btn-primary" onclick="testProfile()">获取用户信息</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>操作</h2>
+        <button class="btn-danger" onclick="clearToken()">清除Token</button>
+        <button class="btn-success" onclick="goToLogin()">跳转到登录页面</button>
+        <button class="btn-success" onclick="goToAdmin()">跳转到管理页面</button>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            element.innerHTML += `<p class="${className}">${message}</p>`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        function checkCurrentStatus() {
+            clearLog('status-check');
+            const token = localStorage.getItem('admin_token');
+            
+            if (token) {
+                log('status-check', `✅ Token存在: ${token.substring(0, 50)}...`, 'success');
+                
+                // 解析token内容
+                try {
+                    const tokenParts = token.split('.');
+                    if (tokenParts.length === 3) {
+                        const payload = JSON.parse(atob(tokenParts[1]));
+                        log('status-check', `Token内容: <pre>${JSON.stringify(payload, null, 2)}</pre>`);
+                        
+                        // 检查过期时间
+                        const exp = payload.exp;
+                        const now = Math.floor(Date.now() / 1000);
+                        if (exp > now) {
+                            log('status-check', `✅ Token未过期，还有 ${exp - now} 秒有效期`, 'success');
+                        } else {
+                            log('status-check', `❌ Token已过期`, 'error');
+                        }
+                    }
+                } catch (e) {
+                    log('status-check', `❌ Token格式错误: ${e.message}`, 'error');
+                }
+            } else {
+                log('status-check', '❌ 未找到Token', 'error');
+            }
+        }
+
+        function testLogin() {
+            clearLog('login-test');
+            log('login-test', '🔄 开始登录测试...');
+            
+            fetch('/v1/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: 'admin',
+                    password: 'admin123'
+                })
+            })
+            .then(response => {
+                log('login-test', `响应状态: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                log('login-test', `响应数据: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+                
+                if (data.status === 0 && data.data && data.data.token) {
+                    localStorage.setItem('admin_token', data.data.token);
+                    log('login-test', '✅ 登录成功，Token已保存', 'success');
+                } else {
+                    log('login-test', '❌ 登录失败', 'error');
+                }
+            })
+            .catch(error => {
+                log('login-test', `❌ 登录错误: ${error.message}`, 'error');
+            });
+        }
+
+        function testToken() {
+            clearLog('token-test');
+            const token = localStorage.getItem('admin_token');
+            
+            if (!token) {
+                log('token-test', '❌ 未找到Token', 'error');
+                return;
+            }
+            
+            log('token-test', '🔄 测试Token有效性...');
+            
+            fetch('/v1/admin/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                log('token-test', `响应状态: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                log('token-test', `响应数据: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+                
+                if (data.status === 0) {
+                    log('token-test', '✅ Token有效', 'success');
+                } else {
+                    log('token-test', '❌ Token无效', 'error');
+                }
+            })
+            .catch(error => {
+                log('token-test', `❌ Token验证错误: ${error.message}`, 'error');
+            });
+        }
+
+        function testProfile() {
+            clearLog('profile-test');
+            const token = localStorage.getItem('admin_token');
+            
+            if (!token) {
+                log('profile-test', '❌ 未找到Token', 'error');
+                return;
+            }
+            
+            log('profile-test', '🔄 获取用户信息...');
+            
+            fetch('/v1/admin/profile', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                log('profile-test', `响应状态: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                log('profile-test', `用户信息: <pre>${JSON.stringify(data, null, 2)}</pre>`);
+                
+                if (data.status === 0) {
+                    log('profile-test', `✅ 用户信息获取成功: ${data.data.username}`, 'success');
+                } else {
+                    log('profile-test', '❌ 用户信息获取失败', 'error');
+                }
+            })
+            .catch(error => {
+                log('profile-test', `❌ 用户信息获取错误: ${error.message}`, 'error');
+            });
+        }
+
+        function clearToken() {
+            localStorage.removeItem('admin_token');
+            alert('Token已清除');
+            checkCurrentStatus();
+        }
+
+        function goToLogin() {
+            window.location.href = '/login.html';
+        }
+
+        function goToAdmin() {
+            window.location.href = '/admin.html';
+        }
+
+        // 页面加载时自动检查状态
+        window.onload = function() {
+            checkCurrentStatus();
+        };
+    </script>
+</body>
+</html> 

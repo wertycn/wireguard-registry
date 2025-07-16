@@ -105,13 +105,13 @@ jobs:
       - name: 等待镜像推送成功
         run: sleep 5
 
-      - name: 部署至k8s
-        uses: wertycn/kuboard-deploy-action@main
-        with:
-          user: "${{ secrets.DEPLOY_USER }}"             # 'kuboard user name'
-          access_key: "${{ secrets.DEPLOY_ACCESS_KEY }}"       # 'kuboard access key'
-          deploy_namespace: "debug-app" # 'deploy cluster namespace'
-          server_name: "wireguard-registry"      # 'deploy server name'
-          docker_image: "${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }}/debug-app/wireguard-registry:${{ github.sha }}"     # 'deploy server docker image'
-          deploy_api_url: "${{ secrets.DEPLOY_API_URL }}"   # 'kuboard deploy (ci/cd) api url,eg http://YOUR_DOMAIN/kuboard-api/cluster/YOUR_CLUSTER_NAME/kind/CICDApi/YOUR_KUBOARD_NAME/resource/updateImageTag'
-          deploy_kind: "deployments"
+      # - name: 部署至k8s
+      #   uses: wertycn/kuboard-deploy-action@main
+      #   with:
+      #     user: "${{ secrets.DEPLOY_USER }}"             # 'kuboard user name'
+      #     access_key: "${{ secrets.DEPLOY_ACCESS_KEY }}"       # 'kuboard access key'
+      #     deploy_namespace: "debug-app" # 'deploy cluster namespace'
+      #     server_name: "wireguard-registry"      # 'deploy server name'
+      #     docker_image: "${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }}/debug-app/wireguard-registry:${{ github.sha }}"     # 'deploy server docker image'
+      #     deploy_api_url: "${{ secrets.DEPLOY_API_URL }}"   # 'kuboard deploy (ci/cd) api url,eg http://YOUR_DOMAIN/kuboard-api/cluster/YOUR_CLUSTER_NAME/kind/CICDApi/YOUR_KUBOARD_NAME/resource/updateImageTag'
+      #     deploy_kind: "deployments"

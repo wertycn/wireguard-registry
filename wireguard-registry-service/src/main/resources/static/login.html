@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8"/>
+    <title>WireGuard服务管理平台 - 登录</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.css"/>
+    <style>
+        html,
+        body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .login-box {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .login-subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h2 class="login-title">WireGuard服务管理平台</h2>
+            <p class="login-subtitle">请使用管理员账号登录</p>
+            <div id="root"></div>
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="https://cdn.bootcdn.net/ajax/libs/amis/3.4.0/sdk.min.js"></script>
+    <script type="text/javascript">
+        let myAmis;
+        
+        // 检查是否已登录
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                window.location.href = '/admin.html';
+                return false;
+            }
+            return true;
+        }
+        
+        (function () {
+            if (!checkAuth()) {
+                return;
+            }
+            
+            myAmis = amisRequire('amis/embed');
+            
+            // 登录表单配置
+            let loginForm = {
+                "type": "form",
+                "api": {
+                    "method": "post",
+                    "url": "/v1/admin/login",
+                    "adaptor": "if (payload.status === 0 && payload.data && payload.data.token) { localStorage.setItem('admin_token', payload.data.token); console.log('Token saved:', payload.data.token); setTimeout(() => { window.location.href = '/admin.html'; }, 100); } return payload;"
+                },
+                "body": [
+                    {
+                        "type": "input-text",
+                        "name": "username",
+                        "label": "用户名",
+                        "placeholder": "请输入用户名",
+                        "required": true,
+                        "validations": {
+                            "minLength": 3,
+                            "maxLength": 20
+                        }
+                    },
+                    {
+                        "type": "input-password",
+                        "name": "password",
+                        "label": "密码",
+                        "placeholder": "请输入密码",
+                        "required": true,
+                        "validations": {
+                            "minLength": 6
+                        }
+                    }
+                ],
+                "actions": [
+                    {
+                        "type": "submit",
+                        "label": "登录",
+                        "level": "primary",
+                        "size": "lg",
+                        "className": "w-full"
+                    }
+                ]
+            };
+            
+            myAmis.embed("#root", loginForm);
+        })();
+    </script>
+</body>
+</html> 

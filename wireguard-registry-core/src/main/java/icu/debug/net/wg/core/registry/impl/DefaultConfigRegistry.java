@@ -190,6 +190,22 @@ public class DefaultConfigRegistry implements ConfigRegistry {
         nodeLastHeartbeat.remove(networkId);
     }
 
+    @Override
+    public void createNetwork(String networkId, String name, String description) {
+        log.info("Creating network: {} ({})", networkId, name);
+        
+        // 检查网络是否已存在
+        if (configStorage.networkExists(networkId)) {
+            throw new IllegalArgumentException("Network already exists: " + networkId);
+        }
+        
+        // 通过初始化网络版本来创建网络
+        // 这样会使得网络能够被 getAllNetworkIds() 返回
+        configStorage.updateNetworkVersion(networkId);
+        
+        log.info("Network created successfully: {}", networkId);
+    }
+
     private void updateNodeHeartbeat(String networkId, String nodeId) {
         nodeLastHeartbeat.computeIfAbsent(networkId, k -> new ConcurrentHashMap<>())
                 .put(nodeId, System.currentTimeMillis());

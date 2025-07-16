@@ -1,0 +1,212 @@
+{
+  "type": "crud",
+  "api": {
+    "method": "get",
+    "url": "/v1/registry/networks",
+    "adaptor": "return { status: 0, data: { items: payload.data.map(networkId => ({ networkId, version: '', nodeCount: '' })) } };"
+  },
+  "loadDataOnce": false,
+  "headerToolbar": [
+    {
+      "type": "button",
+      "label": "刷新",
+      "level": "primary",
+      "actionType": "reload",
+      "icon": "fa fa-refresh"
+    }
+  ],
+  "columns": [
+    {
+      "name": "networkId",
+      "label": "网络ID",
+      "width": 200,
+      "copyable": true,
+      "type": "text"
+    },
+    {
+      "name": "version",
+      "label": "版本",
+      "width": 100,
+      "type": "service",
+      "body": {
+        "type": "tpl",
+        "tpl": "${version}"
+      },
+      "api": {
+        "method": "get",
+        "url": "/v1/registry/networks/${networkId}/version",
+        "adaptor": "return { status: 0, data: { version: payload.data } };"
+      }
+    },
+    {
+      "name": "nodeCount",
+      "label": "节点数量",
+      "width": 100,
+      "type": "service",
+      "body": {
+        "type": "tpl", 
+        "tpl": "${nodeCount}"
+      },
+      "api": {
+        "method": "get",
+        "url": "/v1/registry/networks/${networkId}/nodes",
+        "adaptor": "return { status: 0, data: { nodeCount: payload.data.length } };"
+      }
+    },
+    {
+      "type": "operation",
+      "label": "操作",
+      "width": 350,
+      "buttons": [
+        {
+          "type": "button",
+          "label": "查看节点",
+          "level": "primary",
+          "size": "sm",
+          "actionType": "dialog",
+          "icon": "fa fa-eye",
+          "dialog": {
+            "title": "网络节点管理 - ${networkId}",
+            "size": "xl",
+            "body": {
+              "type": "crud",
+              "api": {
+                "method": "get",
+                "url": "/v1/registry/networks/${networkId}/nodes",
+                "adaptor": "return { status: 0, data: { items: payload.data.map(node => ({ ...node, networkId: '${networkId}' })) } };"
+              },
+              "headerToolbar": [
+                {
+                  "type": "button",
+                  "label": "刷新",
+                  "level": "primary",
+                  "actionType": "reload",
+                  "icon": "fa fa-refresh"
+                }
+              ],
+              "columns": [
+                {
+                  "name": "id",
+                  "label": "节点ID",
+                  "width": 150,
+                  "copyable": true
+                },
+                {
+                  "name": "serverNode.hostname",
+                  "label": "主机名",
+                  "width": 150
+                },
+                {
+                  "name": "serverNode.publicAddress",
+                  "label": "公网地址",
+                  "width": 150
+                },
+                {
+                  "name": "serverNode.privateAddress",
+                  "label": "私网地址",
+                  "width": 150
+                },
+                {
+                  "name": "online",
+                  "label": "在线状态",
+                  "width": 100,
+                  "type": "service",
+                  "body": {
+                    "type": "status",
+                    "source": "${online}",
+                    "map": {
+                      "true": {
+                        "value": "在线",
+                        "status": "success"
+                      },
+                      "false": {
+                        "value": "离线",
+                        "status": "fail"
+                      }
+                    }
+                  },
+                  "api": {
+                    "method": "get",
+                    "url": "/v1/registry/networks/${networkId}/nodes/${id}/status",
+                    "adaptor": "return { status: 0, data: { online: payload.data } };"
+                  }
+                },
+                {
+                  "type": "operation",
+                  "label": "操作",
+                  "width": 200,
+                  "buttons": [
+                    {
+                      "type": "button",
+                      "label": "查看配置",
+                      "level": "primary",
+                      "size": "sm",
+                      "actionType": "dialog",
+                      "icon": "fa fa-file-code-o",
+                      "dialog": {
+                        "title": "节点配置 - ${serverNode.hostname}",
+                        "size": "lg",
+                        "body": {
+                          "type": "service",
+                          "api": {
+                            "method": "get",
+                            "url": "/v1/registry/networks/${networkId}/nodes/${id}/config",
+                            "adaptor": "return { status: 0, data: { content: payload.data.content } };"
+                          },
+                          "body": {
+                            "type": "code",
+                            "language": "ini",
+                            "value": "${content}"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "type": "button",
+                      "label": "注销节点",
+                      "level": "danger",
+                      "size": "sm",
+                      "actionType": "ajax",
+                      "api": {
+                        "method": "delete",
+                        "url": "/v1/registry/networks/${networkId}/nodes/${id}"
+                      },
+                      "confirmText": "确定要注销此节点吗？",
+                      "icon": "fa fa-trash-o"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "button",
+          "label": "重新生成配置",
+          "level": "warning",
+          "size": "sm",
+          "actionType": "ajax",
+          "api": {
+            "method": "post",
+            "url": "/v1/registry/networks/${networkId}/regenerate"
+          },
+          "confirmText": "确定要重新生成此网络的配置吗？",
+          "icon": "fa fa-refresh"
+        },
+        {
+          "type": "button",
+          "label": "删除网络",
+          "level": "danger",
+          "size": "sm",
+          "actionType": "ajax",
+          "api": {
+            "method": "delete",
+            "url": "/v1/registry/networks/${networkId}"
+          },
+          "confirmText": "确定要删除此网络吗？此操作不可逆！",
+          "icon": "fa fa-trash-o"
+        }
+      ]
+    }
+  ]
+} 

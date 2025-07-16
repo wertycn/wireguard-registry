@@ -159,7 +159,11 @@ public class DatabaseConfigStorage implements ConfigStorage {
 
     @Override
     public List<String> getAllNetworkIds() {
-        return networkNodeDao.findAllNetworkIds();
+        // 合并有节点的网络和只有版本记录的网络
+        Set<String> allNetworkIds = new HashSet<>();
+        allNetworkIds.addAll(networkNodeDao.findAllNetworkIds());
+        allNetworkIds.addAll(networkVersionDao.findAllNetworkIds());
+        return new ArrayList<>(allNetworkIds);
     }
 
     @Override
@@ -171,7 +175,9 @@ public class DatabaseConfigStorage implements ConfigStorage {
 
     @Override
     public boolean networkExists(String networkId) {
-        return networkNodeDao.existsByNetworkId(networkId);
+        // 检查是否有节点记录或版本记录
+        return networkNodeDao.existsByNetworkId(networkId) || 
+               networkVersionDao.findByNetworkId(networkId).isPresent();
     }
 
     @Override
