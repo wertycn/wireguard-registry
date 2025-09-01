@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-simple
+  namespace: app
+data:
+  test: "working"

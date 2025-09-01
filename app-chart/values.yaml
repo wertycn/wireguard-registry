@@ -1,0 +1,64 @@
+# Application configuration
+app:
+  name: wireguard-registry
+  namespace: app
+
+# Image configuration
+image:
+  registry: docker.awsv.cn
+  repository: debugicu/wireguard-registry
+  tag: latest
+  pullPolicy: Always
+
+# Deployment configuration
+deployment:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 8080
+  targetPort: 8080
+  name: http
+
+# Ingress configuration
+ingress:
+  enabled: true
+  className: nginx
+  
+  # Host configuration
+  hosts:
+    - host: wireguard.debug.icu
+      paths:
+        - path: /
+          pathType: Prefix
+    - host: wireguard.werty.cn
+      paths:
+        - path: /
+          pathType: Prefix
+  
+  # TLS configuration
+  tls:
+    enabled: true
+    certMapping:
+      "debug.icu": debug-icu-wildcard-tls
+      "werty.cn": werty-cn-wildcard-tls
+
+# Labels and annotations
+labels:
+  app: "wireguard-registry"
+  version: "latest"
+  managed-by: "helm"
+
+annotations: {}
+
+# Node scheduling
+nodeSelector: {}
+tolerations: []
+affinity: {}

@@ -1,0 +1,133 @@
+name: Helm Deploy to Kubernetes
+
+on:
+  push:
+    branches: [ "main", "release-*" ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+          - staging
+      image_tag:
+        description: 'Docker image tag'
+        required: false
+        default: 'latest'
+
+env:
+  HELM_VERSION: v3.18.6
+  CHART_PATH: ./app-chart
+  NAMESPACE: app
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 构建开始通知
+      uses: wertycn/work-wechat-send-action@main
+      with:
+        wechat_id: ${{ secrets.WECHAT_CORP_ID }}
+        agent_secret: ${{ secrets.WECHAT_CROP_SECRET }}
+        agent_id: ${{ secrets.WECHAT_AGENT_ID }}
+        to_user: '@all'
+        msgtype: text
+        send_step: main
+        content: "Helm自动部署开始通知\n\n项目名称: ${{ github.repository }}\n构建分支: ${{ github.ref_name }}\n触发事件: ${{ github.event_name }}\n触发用户: ${{ github.actor }}\n项目地址: <a href='https://wireguard.debug.icu'>WireGuard组网生成器</a>"
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Helm
+      uses: azure/setup-helm@v3
+      with:
+        version: ${{ env.HELM_VERSION }}
+
+    - name: Setup kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Configure kubectl
+      run: |
+        echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > /tmp/kubeconfig
+        echo "KUBECONFIG=/tmp/kubeconfig" >> $GITHUB_ENV
+
+    - name: Determine environment and image tag
+      id: env
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          ENV="${{ github.event.inputs.environment }}"
+          IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+        else
+          # 自动根据分支判断环境
+          case "${{ github.ref_name }}" in
+            main) ENV="prod" ;;
+            release-*) ENV="prod" ;;
+            *) ENV="staging" ;;
+          esac
+          IMAGE_TAG="${{ github.sha }}"
+        fi
+        echo "environment=$ENV" >> $GITHUB_OUTPUT
+        echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+        echo "Deploying to environment: $ENV with image tag: $IMAGE_TAG"
+
+    - name: Lint Helm Chart
+      run: |
+        helm lint ${{ env.CHART_PATH }}
+
+    - name: Dry run deployment
+      run: |
+        helm upgrade --install \
+          --dry-run \
+          --namespace ${{ env.NAMESPACE }} \
+          --create-namespace \
+          --set image.registry=${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }} \
+          --set image.repository=debug-app/wireguard-registry \
+          --set image.tag=${{ steps.env.outputs.image_tag }} \
+          --set ingress.tls.enabled=false \
+          --kube-insecure-skip-tls-verify \
+          wireguard-registry \
+          ${{ env.CHART_PATH }}
+
+    - name: Deploy to Kubernetes
+      run: |
+        helm upgrade --install \
+          --namespace ${{ env.NAMESPACE }} \
+          --create-namespace \
+          --set image.registry=${{ secrets.DOCKER_HUB_REGISTRY_HW_HK }} \
+          --set image.repository=debug-app/wireguard-registry \
+          --set image.tag=${{ steps.env.outputs.image_tag }} \
+          --wait \
+          --timeout 5m \
+          --kube-insecure-skip-tls-verify \
+          wireguard-registry \
+          ${{ env.CHART_PATH }}
+
+    - name: Verify deployment
+      run: |
+        kubectl get all -n ${{ env.NAMESPACE }} -l app.kubernetes.io/instance=wireguard-registry --insecure-skip-tls-verify
+        helm list -n ${{ env.NAMESPACE }} --kube-insecure-skip-tls-verify
+        helm status wireguard-registry -n ${{ env.NAMESPACE }} --kube-insecure-skip-tls-verify
+
+    - name: 部署完成通知
+      uses: wertycn/work-wechat-send-action@main
+      with:
+        wechat_id: ${{ secrets.WECHAT_CORP_ID }}
+        agent_secret: ${{ secrets.WECHAT_CROP_SECRET }}
+        agent_id: ${{ secrets.WECHAT_AGENT_ID }}
+        to_user: '@all'
+        msgtype: text
+        send_step: post
+        content: "Helm自动部署完成通知\n\n执行结果: ${{ job.status }}\n项目名称: ${{ github.repository }}\n构建分支: ${{ github.ref_name }}\n环境: ${{ steps.env.outputs.environment }}\n镜像标签: ${{ steps.env.outputs.image_tag }}\n触发事件: ${{ github.event_name }}\n触发用户: ${{ github.actor }}\n项目地址: <a href='https://wireguard.debug.icu'>WireGuard组网生成器</a>"
+
+    - name: Rollback on failure
+      if: failure()
+      run: |
+        echo "Deployment failed, attempting rollback..."
+        helm rollback wireguard-registry -n ${{ env.NAMESPACE }} --kube-insecure-skip-tls-verify || echo "Rollback failed or not applicable"
+        exit 1
