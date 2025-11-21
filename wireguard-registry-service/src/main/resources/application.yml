@@ -1,0 +1,41 @@
+# WireGuard Registry 配置
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: wireguard-registry
+
+  # JPA 配置（当使用 SQLite 时生效）
+  jpa:
+    hibernate:
+      ddl-auto: update  # 开发环境用 update，生产环境用 validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # 数据源配置（动态切换）
+  datasource:
+    url: ${wireguard.storage.sqlite.url:jdbc:sqlite:./data/wireguard.db}
+    driver-class-name: ${wireguard.storage.sqlite.driver:org.sqlite.JDBC}
+
+# WireGuard 存储配置
+wireguard:
+  storage:
+    # 存储类型: memory, sqlite
+    type: ${STORAGE_TYPE:memory}
+
+    # SQLite 配置
+    sqlite:
+      url: jdbc:sqlite:${SQLITE_PATH:./data/wireguard.db}
+      driver: org.sqlite.JDBC
+
+# 日志配置
+logging:
+  level:
+    icu.debug.net.wg: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

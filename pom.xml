@@ -5,6 +5,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>wireguard-registry-core</module>
+        <module>wireguard-registry-storage</module>
         <module>wireguard-registry-service</module>
         <module>wireguard-registry-client</module>
     </modules>

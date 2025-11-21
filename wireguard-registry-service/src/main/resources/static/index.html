@@ -30,22 +30,49 @@
     let myAmis;
     (function () {
         myAmis = amisRequire('amis/embed');
+
         // 获取页面参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const app = urlParams.get('app') || 'generate';
+
+        // 根据 app 参数选择配置文件
+        const schemaMap = {
+            'generate': '/options/form.json',           // 配置生成
+            'networks': '/options/network-list.json'   // 网络管理
+        };
+
+        const schemaUrl = schemaMap[app] || schemaMap['generate'];
+
         // 渲染页面
         let page = {
             "type": "page",
+            "title": "WireGuard 配置管理",
+            "aside": {
+                "type": "nav",
+                "stacked": true,
+                "links": [
+                    {
+                        "label": "配置生成",
+                        "icon": "fa fa-magic",
+                        "to": "?app=generate",
+                        "active": app === 'generate'
+                    },
+                    {
+                        "label": "网络管理",
+                        "icon": "fa fa-sitemap",
+                        "to": "?app=networks",
+                        "active": app === 'networks'
+                    }
+                ]
+            },
             "body": {
                 "type": "service",
-                "schemaApi": "get:/options/form.json"
+                "schemaApi": "get:" + schemaUrl
             }
-        }
+        };
+
         myAmis.embed("#root", page);
-
     })();
-
-    //    TODO:
-    //     注册IP 相关校验函数
-
 </script>
 </body>
 </html>

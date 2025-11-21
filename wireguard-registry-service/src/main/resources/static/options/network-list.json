@@ -1,0 +1,106 @@
+{
+  "type": "page",
+  "title": "网络管理",
+  "toolbar": [
+    {
+      "type": "button",
+      "label": "创建网络",
+      "icon": "fa fa-plus",
+      "level": "primary",
+      "actionType": "link",
+      "link": "?app=generate"
+    }
+  ],
+  "body": {
+    "type": "crud",
+    "api": "GET:/api/v1/networks",
+    "syncLocation": false,
+    "columns": [
+      {
+        "name": "id",
+        "label": "网络ID",
+        "type": "text"
+      },
+      {
+        "name": "name",
+        "label": "网络名称",
+        "type": "text"
+      },
+      {
+        "name": "version",
+        "label": "版本",
+        "type": "text"
+      },
+      {
+        "name": "createdAt",
+        "label": "创建时间",
+        "type": "datetime"
+      },
+      {
+        "type": "operation",
+        "label": "操作",
+        "buttons": [
+          {
+            "type": "button",
+            "label": "查看配置",
+            "level": "link",
+            "actionType": "dialog",
+            "dialog": {
+              "title": "${name} - 配置列表",
+              "size": "xl",
+              "body": {
+                "type": "service",
+                "api": "GET:/api/v1/networks/${id}/configs",
+                "body": {
+                  "type": "each",
+                  "name": "items",
+                  "items": {
+                    "type": "card",
+                    "header": {
+                      "title": "${nodeName}",
+                      "subTitle": "节点ID: ${nodeId} | 版本: ${version}"
+                    },
+                    "body": [
+                      {
+                        "type": "code",
+                        "language": "ini",
+                        "value": "${configText}"
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "button",
+                        "label": "下载配置",
+                        "actionType": "download",
+                        "api": "GET:/api/v1/networks/${networkId}/configs/${nodeId}/download"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "button",
+            "label": "重新生成",
+            "level": "link",
+            "actionType": "ajax",
+            "confirmText": "确定要重新生成配置吗？",
+            "api": "POST:/api/v1/networks/${id}/regenerate",
+            "reload": "window"
+          },
+          {
+            "type": "button",
+            "label": "删除",
+            "level": "link",
+            "className": "text-danger",
+            "actionType": "ajax",
+            "confirmText": "确定要删除该网络吗？此操作不可恢复！",
+            "api": "DELETE:/api/v1/networks/${id}",
+            "reload": "window"
+          }
+        ]
+      }
+    ]
+  }
+}

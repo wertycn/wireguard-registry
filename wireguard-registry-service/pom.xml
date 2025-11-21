@@ -22,6 +22,19 @@
             <groupId>icu.debug.net.wg.core</groupId>
             <artifactId>wireguard-registry-core</artifactId>
         </dependency>
+
+        <!-- 存储模块 - 按需引入 -->
+        <dependency>
+            <groupId>icu.debug.net.wg</groupId>
+            <artifactId>wireguard-registry-storage-memory</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>icu.debug.net.wg</groupId>
+            <artifactId>wireguard-registry-storage-sqlite</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
